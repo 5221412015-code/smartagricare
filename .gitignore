@@ -1,0 +1,12 @@
+# Dependencies
+node_modules/
+venv/
+__pycache__/
+.env
+
+# OS
+.DS_Store
+
+# Expo
+.expo/
+dist/
