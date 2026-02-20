@@ -1,0 +1,149 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 100 14% 96%;
+    --foreground: 0 0% 16%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 16%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 16%;
+
+    --primary: 120 20% 30%;
+    --primary-foreground: 100 14% 96%;
+
+    --secondary: 100 24% 39%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 90 20% 85%;
+    --muted-foreground: 220 9% 46%;
+
+    --accent: 84 36% 54%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 90 15% 82%;
+    --input: 90 15% 82%;
+    --ring: 120 20% 30%;
+
+    --radius: 1rem;
+
+    /* SmartAgriCare custom tokens */
+    --forest: 120 20% 30%;
+    --olive: 100 24% 39%;
+    --leaf: 84 36% 54%;
+    --sage: 90 24% 78%;
+    --mint: 90 33% 90%;
+    --sky: 197 71% 73%;
+    --warning: 16 62% 60%;
+    --cloud: 80 14% 96%;
+
+    --gradient-forest: linear-gradient(135deg, hsl(120 20% 30%), hsl(100 24% 39%));
+    --gradient-leaf: linear-gradient(135deg, hsl(84 36% 54%), hsl(100 24% 39%));
+    --gradient-mint: linear-gradient(180deg, hsl(90 33% 90%), hsl(90 24% 78%));
+    --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --shadow-elevated: 0 8px 24px rgba(0, 0, 0, 0.12);
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 120 10% 8%;
+    --foreground: 90 20% 92%;
+    --card: 120 10% 12%;
+    --card-foreground: 90 20% 92%;
+    --popover: 120 10% 12%;
+    --popover-foreground: 90 20% 92%;
+    --primary: 84 36% 54%;
+    --primary-foreground: 120 20% 10%;
+    --secondary: 100 24% 25%;
+    --secondary-foreground: 90 20% 92%;
+    --muted: 120 10% 18%;
+    --muted-foreground: 90 10% 60%;
+    --accent: 84 36% 40%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 120 10% 20%;
+    --input: 120 10% 20%;
+    --ring: 84 36% 54%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    overscroll-behavior: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html, body, #root {
+    height: 100%;
+    min-height: 100dvh;
+  }
+
+  /* Prevent pull-to-refresh in WebView */
+  html {
+    overflow: hidden;
+  }
+  #root {
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@layer utilities {
+  .glass-card {
+    @apply bg-primary/80 backdrop-blur-md border border-white/10;
+  }
+
+  .gradient-forest {
+    background: var(--gradient-forest);
+  }
+
+  .gradient-leaf {
+    background: var(--gradient-leaf);
+  }
+
+  .gradient-mint {
+    background: var(--gradient-mint);
+  }
+
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
+
+  .shadow-elevated {
+    box-shadow: var(--shadow-elevated);
+  }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+}

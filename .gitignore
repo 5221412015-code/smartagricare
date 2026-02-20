@@ -4,9 +4,23 @@ venv/
 __pycache__/
 .env
 
+# Build output
+dist/
+frontend/dist/
+
+# Removed from project
+mobile-app/
+
 # OS
 .DS_Store
 
+# Claude temp files
+tmpclaude-*
+**/tmpclaude-*
+
 # Expo
 .expo/
-dist/
+expo-app/node_modules/
+
+# Backend data (SQLite)
+backend/data/

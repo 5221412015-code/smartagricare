@@ -1,0 +1,10 @@
+{
+  "name": "smartagricare",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "cd frontend && npm install && npm run build",
+    "start": "cd backend && node index.js",
+    "dev": "cd frontend && npm run dev"
+  }
+}
