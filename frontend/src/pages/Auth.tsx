@@ -36,6 +36,7 @@ const Auth = () => {
   const [resetNewPw, setResetNewPw] = useState("");
   const [resetLoading, setResetLoading] = useState(false);
   const [authError, setAuthError] = useState("");
+  const [authLoading, setAuthLoading] = useState(false);
   const { login, signup } = useAuth();
   const { language } = useApp();
   const navigate = useNavigate();
@@ -45,6 +46,7 @@ const Auth = () => {
 
   const onLogin = async (data: LoginForm) => {
     setAuthError("");
+    setAuthLoading(true);
     try {
       await login(data.email, data.password);
       navigate("/dashboard", { replace: true });
@@ -56,15 +58,18 @@ const Auth = () => {
         setAuthError(msg);
       }
     }
+    setAuthLoading(false);
   };
   const onSignup = async (data: SignupForm) => {
     setAuthError("");
+    setAuthLoading(true);
     try {
       await signup(data.name, data.email, data.password);
       navigate("/dashboard", { replace: true });
     } catch (err: any) {
       setAuthError(err?.message || "Signup failed");
     }
+    setAuthLoading(false);
   };
 
   const handleForgotSendOtp = async () => {
@@ -77,11 +82,6 @@ const Auth = () => {
       const res = await authAPI.forgotPassword(resetEmail);
       if (res.success) {
         toast.success(res.message);
-        if (res.otp) {
-          // No email service configured — auto-fill OTP for the user
-          setResetOtp(res.otp);
-          toast.success(`Your reset code: ${res.otp}`, { duration: 15000 });
-        }
         setForgotStep("otp");
       } else {
         toast.error(res.error || "Failed to send reset code");
@@ -144,7 +144,7 @@ const Auth = () => {
           {forgotStep ? (
             <motion.div key="forgot" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }}>
               <button onClick={() => { setForgotStep(null); setResetOtp(""); setResetNewPw(""); }} className="flex items-center gap-1 text-sm text-accent font-medium mb-4">
-                <ArrowLeft className="h-4 w-4" /> Back to Login
+                <ArrowLeft className="h-4 w-4" /> {t('back_to_login', language)}
               </button>
               <h1 className="mb-1 text-2xl font-bold text-foreground">{t('reset_password', language)}</h1>
 
@@ -154,7 +154,7 @@ const Auth = () => {
                   <div className="flex flex-col gap-4">
                     <div className="relative">
                       <Mail className={iconCls} />
-                      <input value={resetEmail} onChange={e => setResetEmail(e.target.value)} placeholder="Email" className={inputCls} />
+                      <input value={resetEmail} onChange={e => setResetEmail(e.target.value)} placeholder="Email" aria-label="Email address for password reset" className={inputCls} />
                     </div>
                     <button onClick={handleForgotSendOtp} disabled={resetLoading} className="w-full rounded-xl bg-primary py-3.5 font-semibold text-primary-foreground disabled:opacity-50 active:scale-[0.98] transition-transform">
                       {resetLoading ? <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" /> : t('send_otp', language)}
@@ -167,11 +167,11 @@ const Auth = () => {
                   <div className="flex flex-col gap-4">
                     <div className="relative">
                       <KeyRound className={iconCls} />
-                      <input value={resetOtp} onChange={e => setResetOtp(e.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="6-digit code" inputMode="numeric" maxLength={6} className={inputCls} />
+                      <input value={resetOtp} onChange={e => setResetOtp(e.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="6-digit code" inputMode="numeric" maxLength={6} aria-label="6-digit reset code" className={inputCls} />
                     </div>
                     <div className="relative">
                       <Lock className={iconCls} />
-                      <input type="password" value={resetNewPw} onChange={e => setResetNewPw(e.target.value)} placeholder={t('new_password', language)} className={inputCls} />
+                      <input type="password" value={resetNewPw} onChange={e => setResetNewPw(e.target.value)} placeholder={t('new_password', language)} aria-label="New password" className={inputCls} />
                     </div>
                     <button onClick={handleResetPassword} disabled={resetLoading} className="w-full rounded-xl bg-primary py-3.5 font-semibold text-primary-foreground disabled:opacity-50 active:scale-[0.98] transition-transform">
                       {resetLoading ? <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" /> : t('reset_password', language)}
@@ -200,12 +200,12 @@ const Auth = () => {
                 <form onSubmit={loginForm.handleSubmit(onLogin)} className="flex flex-col gap-4">
                   <div className="relative">
                     <Mail className={iconCls} />
-                    <input {...loginForm.register("email")} placeholder="Email" className={inputCls} />
+                    <input {...loginForm.register("email")} placeholder="Email" aria-label="Email address" className={inputCls} />
                   </div>
                   {loginForm.formState.errors.email && <p className="text-xs text-destructive -mt-2">{loginForm.formState.errors.email.message}</p>}
                   <div className="relative">
                     <Lock className={iconCls} />
-                    <input {...loginForm.register("password")} type={showPw ? "text" : "password"} placeholder="Password" className={inputCls} />
+                    <input {...loginForm.register("password")} type={showPw ? "text" : "password"} placeholder="Password" aria-label="Password" className={inputCls} />
                     <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground">
                       {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
@@ -216,26 +216,30 @@ const Auth = () => {
                     {t('forgot_password', language)}
                   </button>
 
-                  <button type="submit" className="w-full rounded-xl bg-primary py-3.5 font-semibold text-primary-foreground active:scale-[0.98] transition-transform">{t('login', language)}</button>
+                  <button type="submit" disabled={authLoading} className="w-full rounded-xl bg-primary py-3.5 font-semibold text-primary-foreground active:scale-[0.98] transition-transform disabled:opacity-60">
+                    {authLoading ? <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" /> : t('login', language)}
+                  </button>
                   <p className="text-center text-sm text-muted-foreground">{t('dont_have_account', language)} <button type="button" onClick={() => setTab("signup")} className="text-accent font-medium">{t('sign_up', language)}</button></p>
                 </form>
               ) : (
                 <form onSubmit={signupForm.handleSubmit(onSignup)} className="flex flex-col gap-4">
-                  <div className="relative"><User className={iconCls} /><input {...signupForm.register("name")} placeholder="Full Name" className={inputCls} /></div>
+                  <div className="relative"><User className={iconCls} /><input {...signupForm.register("name")} placeholder="Full Name" aria-label="Full name" className={inputCls} /></div>
                   {signupForm.formState.errors.name && <p className="text-xs text-destructive -mt-2">{signupForm.formState.errors.name.message}</p>}
-                  <div className="relative"><Mail className={iconCls} /><input {...signupForm.register("email")} placeholder="Email" className={inputCls} /></div>
+                  <div className="relative"><Mail className={iconCls} /><input {...signupForm.register("email")} placeholder="Email" aria-label="Email address" className={inputCls} /></div>
                   {signupForm.formState.errors.email && <p className="text-xs text-destructive -mt-2">{signupForm.formState.errors.email.message}</p>}
                   <div className="relative">
                     <Lock className={iconCls} />
-                    <input {...signupForm.register("password")} type={showPw ? "text" : "password"} placeholder="Password" className={inputCls} />
+                    <input {...signupForm.register("password")} type={showPw ? "text" : "password"} placeholder="Password" aria-label="Password" className={inputCls} />
                     <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground">
                       {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
                   </div>
                   {signupForm.formState.errors.password && <p className="text-xs text-destructive -mt-2">{signupForm.formState.errors.password.message}</p>}
-                  <div className="relative"><Lock className={iconCls} /><input {...signupForm.register("confirmPassword")} type="password" placeholder="Confirm Password" className={inputCls} /></div>
+                  <div className="relative"><Lock className={iconCls} /><input {...signupForm.register("confirmPassword")} type="password" placeholder="Confirm Password" aria-label="Confirm password" className={inputCls} /></div>
                   {signupForm.formState.errors.confirmPassword && <p className="text-xs text-destructive -mt-2">{signupForm.formState.errors.confirmPassword.message}</p>}
-                  <button type="submit" className="w-full rounded-xl bg-primary py-3.5 font-semibold text-primary-foreground active:scale-[0.98] transition-transform">{t('create_account', language)}</button>
+                  <button type="submit" disabled={authLoading} className="w-full rounded-xl bg-primary py-3.5 font-semibold text-primary-foreground active:scale-[0.98] transition-transform disabled:opacity-60">
+                    {authLoading ? <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" /> : t('create_account', language)}
+                  </button>
                   <p className="text-center text-sm text-muted-foreground">{t('already_registered', language)} <button type="button" onClick={() => setTab("login")} className="text-accent font-medium">{t('login', language)}</button></p>
                 </form>
               )}

@@ -1,18 +1,17 @@
 // API goes through Vite proxy (/api → localhost:5000), so use same origin
 const API_BASE_URL = import.meta.env.VITE_API_URL || '';
-// ML service: use env var if set, otherwise in dev use hostname:5001, in prod same origin
-const ML_SERVICE_URL = import.meta.env.VITE_ML_URL ||
-  (import.meta.env.DEV ? `http://${window.location.hostname}:5001` : '');
 
-async function apiFetch<T = any>(url: string, options: RequestInit = {}): Promise<T> {
+async function apiFetch<T = any>(url: string, options: RequestInit = {}, timeoutMs = 15000): Promise<T> {
     const token = localStorage.getItem('smartagricare_token');
     const headers: Record<string, string> = { ...(options.headers as Record<string, string> || {}) };
     if (token) headers['Authorization'] = `Bearer ${token}`;
     if (!(options.body instanceof FormData)) headers['Content-Type'] = 'application/json';
+    // Skip ngrok browser interstitial on free tier
+    headers['ngrok-skip-browser-warning'] = 'true';
 
-    // Add 15s timeout
+    // Add timeout
     const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), 15000);
+    const id = setTimeout(() => controller.abort(), timeoutMs);
 
     try {
         const res = await fetch(url, { ...options, headers, signal: controller.signal });
@@ -24,13 +23,39 @@ async function apiFetch<T = any>(url: string, options: RequestInit = {}): Promis
         } catch {
             throw new Error(`Server returned invalid response (${res.status})`);
         }
-        if (!res.ok) throw new Error(data.error || `Request failed: ${res.status}`);
+        if (!res.ok) {
+            if (res.status === 401 && !url.includes('/api/auth/login') && !url.includes('/api/auth/register')) {
+                localStorage.removeItem('smartagricare_token');
+                localStorage.removeItem('smartagricare_user');
+                window.location.href = '/auth';
+            }
+            throw new Error(data.error || `Request failed: ${res.status}`);
+        }
         return data;
     } catch (err: any) {
         clearTimeout(id);
         if (err.name === 'AbortError') throw new Error("Request timeout. Server unreachable.");
         throw err;
     }
+}
+
+/** Retry wrapper — retries on timeout/network errors with exponential backoff */
+async function apiFetchWithRetry<T = any>(
+    url: string, options: RequestInit = {}, timeoutMs = 30000, retries = 2
+): Promise<T> {
+    for (let attempt = 0; attempt <= retries; attempt++) {
+        try {
+            return await apiFetch<T>(url, options, timeoutMs);
+        } catch (err: any) {
+            const isRetryable = err.message?.includes('timeout') ||
+                err.message?.includes('Failed to fetch') ||
+                err.message?.includes('NetworkError') ||
+                err.message?.includes('Server returned invalid');
+            if (attempt === retries || !isRetryable) throw err;
+            await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
+        }
+    }
+    throw new Error('Request failed after retries');
 }
 
 export const authAPI = {
@@ -44,6 +69,20 @@ export const authAPI = {
         apiFetch(`${API_BASE_URL}/api/auth/reset-password`, { method: 'POST', body: JSON.stringify({ email, otp, newPassword }) }),
     updateProfile: (userId: number, fields: { name?: string; phone?: string; location?: string }) =>
         apiFetch(`${API_BASE_URL}/api/auth/profile`, { method: 'PUT', body: JSON.stringify({ userId, ...fields }) }),
+    validate: async (token: string): Promise<{ success: boolean }> => {
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/auth/validate`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'ngrok-skip-browser-warning': 'true',
+                },
+            });
+            const data = await res.json();
+            return data;
+        } catch {
+            return { success: true }; // network error — don't logout, server may be starting
+        }
+    },
 };
 
 export const weatherAPI = {
@@ -52,10 +91,14 @@ export const weatherAPI = {
 };
 
 export const diseaseAPI = {
-    detectDisease: (imageFile: File) => {
+    detectDisease: (imageFile: File, language?: string) => {
         const formData = new FormData();
         formData.append('image', imageFile);
-        return apiFetch(`${ML_SERVICE_URL}/predict`, { method: 'POST', body: formData });
+        const extraHeaders: Record<string, string> = {};
+        if (language && language !== 'en') extraHeaders['X-Language'] = language;
+        return apiFetchWithRetry(`${API_BASE_URL}/api/disease/detect`, {
+            method: 'POST', body: formData, headers: extraHeaders,
+        }, 60000, 2);
     },
     saveReport: (report: { userId?: number; disease: string; confidence: number; cause: string; treatment: string[]; stores: string[]; imageName?: string }) =>
         apiFetch(`${API_BASE_URL}/api/disease/report`, { method: 'POST', body: JSON.stringify(report) }),
@@ -77,10 +120,13 @@ export const cropAPI = {
 
 export const storeAPI = {
     getNearbyStores: (lat: number, lng: number, radius?: number) =>
-        apiFetch(`${API_BASE_URL}/api/stores/nearby?lat=${lat}&lng=${lng}${radius ? `&radius=${radius}` : ''}`),
+        apiFetch(`${API_BASE_URL}/api/stores/nearby?lat=${lat}&lng=${lng}${radius ? `&radius=${radius}` : ''}`, {}, 30000),
 };
 
 export const voiceAPI = {
-    processQuery: (query: string, language?: string) =>
-        apiFetch(`${API_BASE_URL}/api/voice/query`, { method: 'POST', body: JSON.stringify({ query, language }) }),
+    processQuery: (query: string, language?: string, history?: { role: string; content: string }[]) =>
+        apiFetchWithRetry(`${API_BASE_URL}/api/voice/query`, {
+            method: 'POST',
+            body: JSON.stringify({ query, language, history: history || [] }),
+        }, 60000, 1),
 };

@@ -24,3 +24,16 @@ expo-app/node_modules/
 
 # Backend data (SQLite)
 backend/data/
+
+# Large model files
+*.pth
+
+# Test artifacts
+_test*
+_backend.log
+_frontend.log
+_ml.log
+*.log
+
+# EAS build config (root level only)
+/.easignore

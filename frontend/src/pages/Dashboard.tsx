@@ -2,21 +2,66 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useApp } from "@/contexts/AppContext";
 import { useNavigate } from "react-router-dom";
 import MobileLayout from "@/components/MobileLayout";
-import { Bell, MapPin, Droplets, Cloud, Wind, Bug, Sprout, Globe, Check } from "lucide-react";
+import { MapPin, Droplets, Cloud, Wind, Bug, Sprout, Globe, Check, Sun, Mic, CloudRain, CloudDrizzle, CloudSnow, CloudLightning, CloudFog, CloudSun, RefreshCw } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { weatherAPI } from "@/services/api";
 import { t } from "@/lib/i18n";
+import { toast } from "sonner";
 import dashboardHero from "@/assets/dashboard-hero.jpg";
 
-const defaultWeather = {
-  location: "Andhra Pradesh, India",
+interface ForecastDay {
+  date: string;
+  tempMax: number;
+  tempMin: number;
+  precipitation: number;
+  condition: string;
+  weatherCode: number;
+}
+
+interface WeatherState {
+  location: string;
+  temp: number;
+  feelsLike: number;
+  condition: string;
+  humidity: number;
+  precipitation: number;
+  wind: number;
+  uvIndex: number;
+  weatherCode: number;
+  forecast: ForecastDay[];
+}
+
+const defaultWeather: WeatherState = {
+  location: "Visakhapatnam, Andhra Pradesh",
   temp: 28,
+  feelsLike: 30,
   condition: "Clear sky",
   humidity: 65,
   precipitation: 0,
   wind: 12,
+  uvIndex: 0,
+  weatherCode: 0,
+  forecast: [],
 };
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function mapWeatherData(data: any): WeatherState {
+  return {
+    location: data.location || defaultWeather.location,
+    temp: data.temperature ?? defaultWeather.temp,
+    feelsLike: data.feelsLike ?? defaultWeather.feelsLike,
+    condition: data.condition || defaultWeather.condition,
+    humidity: data.humidity ?? defaultWeather.humidity,
+    precipitation: data.precipitation ?? defaultWeather.precipitation,
+    wind: data.windSpeed ?? defaultWeather.wind,
+    uvIndex: data.uvIndex ?? defaultWeather.uvIndex,
+    weatherCode: data.weatherCode ?? 0,
+    forecast: Array.isArray(data.forecast) ? data.forecast : [],
+  };
+}
+
+const DAY_KEYS = ['day_sun', 'day_mon', 'day_tue', 'day_wed', 'day_thu', 'day_fri', 'day_sat'];
 
 const languages = [
   { code: "en" as const, name: "English", native: "English", flag: "🇬🇧" },
@@ -24,43 +69,78 @@ const languages = [
   { code: "te" as const, name: "Telugu", native: "తెలుగు", flag: "🇮🇳" },
 ];
 
+function getWeatherIcon(code: number, className: string) {
+  // WMO Weather interpretation codes
+  if (code === 0 || code === 1) return <Sun className={className} />;
+  if (code === 2) return <CloudSun className={className} />;
+  if (code === 3) return <Cloud className={className} />;
+  if (code === 45 || code === 48) return <CloudFog className={className} />;
+  if (code >= 51 && code <= 57) return <CloudDrizzle className={className} />;
+  if (code >= 61 && code <= 67) return <CloudRain className={className} />;
+  if (code >= 71 && code <= 77) return <CloudSnow className={className} />;
+  if (code >= 80 && code <= 82) return <CloudRain className={className} />;
+  if (code >= 85 && code <= 86) return <CloudSnow className={className} />;
+  if (code >= 95) return <CloudLightning className={className} />;
+  return <Cloud className={className} />;
+}
+
+function getForecastIcon(code: number, className: string) {
+  return getWeatherIcon(code, className);
+}
+
 const Dashboard = () => {
   const { user } = useAuth();
-  const { language, setLanguage } = useApp();
+  const { language, setLanguage, coords } = useApp();
   const navigate = useNavigate();
   const [showLangModal, setShowLangModal] = useState(false);
   const [weatherData, setWeatherData] = useState(defaultWeather);
+  const [weatherLoading, setWeatherLoading] = useState(true);
+  const [weatherFallback, setWeatherFallback] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const cancelledRef = useRef(false);
+  const hasFetched = useRef(false);
 
-  useEffect(() => {
-    // Get user's real location for weather
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          fetchWeather(pos.coords.latitude, pos.coords.longitude);
-        },
-        () => {
-          // Fallback to AP center if location denied
-          fetchWeather(15.9129, 79.74);
-        },
-        { timeout: 5000 }
-      );
-    } else {
-      fetchWeather(15.9129, 79.74);
-    }
-  }, []);
-
-  const fetchWeather = (lat: number, lng: number) => {
+  const doFetchWeather = (lat: number, lng: number) => {
     weatherAPI.getCurrentWeather(lat, lng).then(data => {
-      if (data) setWeatherData({
-        location: data.location || defaultWeather.location,
-        temp: data.temperature ?? defaultWeather.temp,
-        condition: data.condition || defaultWeather.condition,
-        humidity: data.humidity ?? defaultWeather.humidity,
-        precipitation: data.precipitation ?? defaultWeather.precipitation,
-        wind: data.windSpeed ?? defaultWeather.wind,
-      });
+      if (cancelledRef.current) return;
+      if (data) {
+        setWeatherData(mapWeatherData(data));
+        setWeatherFallback(false);
+      }
+      setWeatherLoading(false);
     }).catch((err) => {
+      if (cancelledRef.current) return;
       console.error('Weather fetch failed:', err.message);
+      setWeatherFallback(true);
+      setWeatherLoading(false);
+      toast.error("Weather data unavailable. Showing defaults.");
+    });
+  };
+
+  // Use cached coords from AppContext — no direct geolocation call
+  useEffect(() => {
+    cancelledRef.current = false;
+    if (!coords || hasFetched.current) return;
+    hasFetched.current = true;
+    doFetchWeather(coords.lat, coords.lng);
+    return () => { cancelledRef.current = true; };
+  }, [coords]);
+
+  const refreshWeather = () => {
+    if (!coords || cancelledRef.current) return;
+    setRefreshing(true);
+    setWeatherFallback(false);
+    weatherAPI.getCurrentWeather(coords.lat, coords.lng).then(data => {
+      if (cancelledRef.current) return;
+      if (data) {
+        setWeatherData(mapWeatherData(data));
+        setWeatherFallback(false);
+      }
+      setRefreshing(false);
+    }).catch(() => {
+      if (cancelledRef.current) return;
+      setWeatherFallback(true);
+      setRefreshing(false);
     });
   };
 
@@ -68,6 +148,7 @@ const Dashboard = () => {
     { icon: Bug, title: t('disease_detection', language), sub: t('take_photo', language), badge: "Scan", badgeColor: "bg-accent/20 text-accent", link: "/disease-detection" },
     { icon: Sprout, title: t('crop_recommendation', language), sub: t('get_ai_suggestions', language), badge: "AP Crops", badgeColor: "bg-sky/20 text-sky", link: "/crop-recommendation" },
     { icon: MapPin, title: t('local_stores', language), sub: t('find_stores', language), badge: t('open', language), badgeColor: "bg-accent/20 text-accent", link: "/stores" },
+    { icon: Mic, title: t('voice_assistant', language), sub: t('ask_anything', language), badge: "AI", badgeColor: "bg-purple-100 text-purple-600", link: "/voice-assistant" },
     { icon: Globe, title: t('language', language), sub: languages.find(l => l.code === language)?.native || "English", badge: "Change", badgeColor: "bg-muted text-muted-foreground", link: null },
   ];
 
@@ -78,7 +159,7 @@ const Dashboard = () => {
 
   return (
     <MobileLayout>
-      {/* Hero background — fills top, no white gap */}
+      {/* Hero background */}
       <div className="relative">
         <img src={dashboardHero} alt="" className="absolute inset-x-0 top-0 h-56 w-full object-cover" />
         <div className="absolute inset-x-0 top-0 h-56 bg-gradient-to-b from-background/10 via-background/60 to-background" />
@@ -91,27 +172,29 @@ const Dashboard = () => {
             <h2 className="text-lg font-bold text-foreground">{t('hi_user', language, { name: user?.name || 'Farmer' })}</h2>
             <p className="text-sm text-muted-foreground">{t('welcome_back', language)}</p>
           </div>
-          <button className="flex h-10 w-10 items-center justify-center rounded-full bg-card shadow-card">
-            <Bell className="h-5 w-5 text-muted-foreground" />
-          </button>
         </div>
 
         {/* Weather Card */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="glass-card rounded-3xl p-5 text-primary-foreground mb-5"
+          className={`glass-card rounded-3xl p-5 text-primary-foreground mb-5 ${weatherLoading ? 'animate-pulse' : ''}`}
         >
           <div className="flex items-center gap-1.5 text-xs opacity-80 mb-3">
             <MapPin className="h-3.5 w-3.5" />
-            <span>{weatherData.location}</span>
+            <span className="flex-1">{weatherData.location}</span>
+            {weatherFallback && <span className="text-[11px] text-orange-300">(offline)</span>}
+            <button onClick={refreshWeather} disabled={refreshing} className="opacity-60 hover:opacity-100 transition-opacity ml-1">
+              <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`} />
+            </button>
           </div>
           <div className="flex items-center justify-between mb-4">
             <div>
               <p className="text-5xl font-bold">{weatherData.temp}°</p>
               <p className="text-sm opacity-80 mt-1">{weatherData.condition}</p>
+              <p className="text-xs opacity-60 mt-0.5">{t('feels_like', language)} {weatherData.feelsLike}°</p>
             </div>
-            <Cloud className="h-14 w-14 opacity-70" />
+            {getWeatherIcon(weatherData.weatherCode, "h-14 w-14 opacity-70")}
           </div>
           <div className="grid grid-cols-3 gap-3 rounded-2xl bg-primary-foreground/10 p-3">
             <div className="flex flex-col items-center gap-1">
@@ -120,9 +203,9 @@ const Dashboard = () => {
               <span className="text-sm font-semibold">{weatherData.humidity}%</span>
             </div>
             <div className="flex flex-col items-center gap-1">
-              <Cloud className="h-4 w-4 opacity-70" />
-              <span className="text-xs opacity-70">{t('precipitation', language)}</span>
-              <span className="text-sm font-semibold">{weatherData.precipitation} mm</span>
+              <Sun className="h-4 w-4 opacity-70" />
+              <span className="text-xs opacity-70">{t('uv_index', language)}</span>
+              <span className="text-sm font-semibold">{weatherData.uvIndex}</span>
             </div>
             <div className="flex flex-col items-center gap-1">
               <Wind className="h-4 w-4 opacity-70" />
@@ -130,12 +213,27 @@ const Dashboard = () => {
               <span className="text-sm font-semibold">{weatherData.wind} km/h</span>
             </div>
           </div>
+          {weatherData.forecast.length > 0 && (
+            <div className="mt-3 flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+              {weatherData.forecast.slice(0, 7).map((day, i) => {
+                const d = new Date(day.date + 'T00:00:00');
+                const label = i === 0 ? t('today', language) : t(DAY_KEYS[d.getDay()], language);
+                return (
+                  <div key={day.date} className="flex flex-col items-center gap-0.5 rounded-xl bg-primary-foreground/10 px-2.5 py-2 min-w-[52px]">
+                    <span className="text-[10px] opacity-70">{label}</span>
+                    {getForecastIcon(day.weatherCode, "h-3.5 w-3.5 opacity-70")}
+                    <span className="text-xs font-semibold">{day.tempMax}°</span>
+                    <span className="text-[10px] opacity-60">{day.tempMin}°</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </motion.div>
 
         {/* Activity Tiles */}
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-semibold text-foreground">{t('recent_activity', language)}</h3>
-          <button className="text-xs text-accent font-medium">{t('see_all', language)}</button>
         </div>
 
         <div className="space-y-3 pb-4">

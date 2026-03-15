@@ -1,27 +1,28 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { Home, Wheat, Plus, Mic, Bug, Sprout, MapPin, ScanLine, User } from "lucide-react";
+import { Home, Wheat, Plus, Mic, MapPin, ScanLine, User } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-
-const navItems = [
-  { icon: Home, label: "Home", path: "/dashboard" },
-  { icon: Wheat, label: "Crop Rec.", path: "/crop-recommendation" },
-  null, // center FAB placeholder
-  { icon: ScanLine, label: "Scan", path: "/disease-detection" },
-  { icon: User, label: "Profile", path: "/profile" },
-];
-
-const fabActions = [
-  { icon: Bug, label: "Scan Disease", path: "/disease-detection" },
-  { icon: Sprout, label: "Crop Advice", path: "/crop-recommendation" },
-  { icon: MapPin, label: "Find Stores", path: "/stores" },
-  { icon: Mic, label: "Voice Assistant", path: "/voice" },
-];
+import { useApp } from "@/contexts/AppContext";
+import { t } from "@/lib/i18n";
 
 const BottomNav = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [fabOpen, setFabOpen] = useState(false);
+  const { language } = useApp();
+
+  const navItems = [
+    { icon: Home, label: t('nav_home', language), path: "/dashboard" },
+    { icon: Wheat, label: t('nav_crop_rec', language), path: "/crop-recommendation" },
+    null, // center FAB placeholder
+    { icon: ScanLine, label: t('nav_scan', language), path: "/disease-detection" },
+    { icon: User, label: t('nav_profile', language), path: "/profile" },
+  ];
+
+  const fabActions = [
+    { icon: MapPin, label: t('nav_find_stores', language), path: "/stores" },
+    { icon: Mic, label: t('nav_voice', language), path: "/voice-assistant" },
+  ];
 
   return (
     <>
@@ -37,7 +38,7 @@ const BottomNav = () => {
             <div className="absolute bottom-32 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3">
               {fabActions.map((action, i) => (
                 <motion.button
-                  key={action.label}
+                  key={action.path}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0, transition: { delay: i * 0.05 } }}
                   exit={{ opacity: 0, y: 20 }}
@@ -75,7 +76,7 @@ const BottomNav = () => {
             const active = location.pathname === item.path;
             return (
               <button
-                key={item.label}
+                key={item.path}
                 onClick={() => navigate(item.path)}
                 className="flex flex-col items-center gap-1 min-w-[48px] min-h-[48px] justify-center"
               >
@@ -83,6 +84,7 @@ const BottomNav = () => {
                 <span className={`text-[11px] transition-colors ${active ? "font-semibold text-primary" : "text-muted-foreground"}`}>
                   {item.label}
                 </span>
+                {active && <div className="h-1 w-4 rounded-full bg-primary mt-0.5" />}
               </button>
             );
           })}

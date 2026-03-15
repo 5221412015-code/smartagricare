@@ -61,7 +61,7 @@ const App = () => (
                 <Route path="/language" element={<Language />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-                <Route path="/voice" element={<ProtectedRoute><VoiceAssistant /></ProtectedRoute>} />
+                <Route path="/voice-assistant" element={<ProtectedRoute><VoiceAssistant /></ProtectedRoute>} />
                 <Route path="/disease-detection" element={<ProtectedRoute><DiseaseDetection /></ProtectedRoute>} />
                 <Route path="/crop-recommendation" element={<ProtectedRoute><CropRecommendation /></ProtectedRoute>} />
                 <Route path="/stores" element={<ProtectedRoute><Stores /></ProtectedRoute>} />

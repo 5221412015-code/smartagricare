@@ -24,8 +24,8 @@ const Profile = () => {
   const [editValues, setEditValues] = useState({
     name: user?.name || "",
     email: user?.email || "",
-    phone: "+91 98765 43210",
-    location: user?.location || "Andhra Pradesh, India",
+    phone: user?.phone || "",
+    location: user?.location || "",
   });
   const [savedValues, setSavedValues] = useState({ ...editValues });
   const [showLangModal, setShowLangModal] = useState(false);
@@ -85,7 +85,7 @@ const Profile = () => {
             </button>
           </div>
           <h2 className="text-xl font-bold text-foreground">{savedValues.name}</h2>
-          <p className="text-sm text-muted-foreground">Farmer • {savedValues.location}</p>
+          <p className="text-sm text-muted-foreground">{t('farmer', language)} • {savedValues.location}</p>
         </motion.div>
 
         {/* Account Details */}
@@ -113,7 +113,7 @@ const Profile = () => {
               <item.icon className="h-4 w-4 text-muted-foreground shrink-0" />
               <div className="flex-1">
                 <p className="text-xs text-muted-foreground">{item.label}</p>
-                {editing ? (
+                {editing && item.key !== "email" ? (
                   <input
                     value={editValues[item.key]}
                     onChange={e => setEditValues(prev => ({ ...prev, [item.key]: e.target.value }))}
@@ -134,7 +134,7 @@ const Profile = () => {
             className="flex w-full items-center gap-3 px-4 py-3.5 text-left"
           >
             <Globe className="h-4 w-4 text-muted-foreground" />
-            <span className="flex-1 text-sm text-foreground">Language</span>
+            <span className="flex-1 text-sm text-foreground">{t('language', language)}</span>
             <span className="text-xs text-muted-foreground mr-1">{currentLangLabel}</span>
             <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
           </button>

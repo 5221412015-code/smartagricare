@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 import { authAPI } from "@/services/api";
 
 interface User {
@@ -28,17 +28,33 @@ export const useAuth = () => {
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(() => {
-    const saved = localStorage.getItem("smartagricare_user");
-    return saved ? JSON.parse(saved) : null;
+    try {
+      const saved = localStorage.getItem("smartagricare_user");
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
   });
+
+  // Validate stored token against backend on mount
+  useEffect(() => {
+    const token = localStorage.getItem("smartagricare_token");
+    if (!token || !user) return;
+    authAPI.validate(token).then(data => {
+      if (!data.success) {
+        setUser(null);
+        try { localStorage.removeItem("smartagricare_user"); localStorage.removeItem("smartagricare_token"); } catch { /* ignore */ }
+      }
+    });
+  }, []);
 
   const login = useCallback(async (email: string, password: string) => {
     const data = await authAPI.login(email, password);
     if (!data.success) throw new Error(data.error || "Login failed");
     const u = { ...data.user, id: String(data.user.id) };
     setUser(u);
-    localStorage.setItem("smartagricare_user", JSON.stringify(u));
-    if (data.token) localStorage.setItem("smartagricare_token", data.token);
+    try { localStorage.setItem("smartagricare_user", JSON.stringify(u)); } catch { /* ignore */ }
+    if (data.token) try { localStorage.setItem("smartagricare_token", data.token); } catch { /* ignore */ }
   }, []);
 
   const signup = useCallback(async (name: string, email: string, password: string) => {
@@ -52,23 +68,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       location: "Andhra Pradesh, India",
     };
     setUser(u);
-    localStorage.setItem("smartagricare_user", JSON.stringify(u));
+    try { localStorage.setItem("smartagricare_user", JSON.stringify(u)); } catch { /* ignore */ }
     if (data.token) {
-      localStorage.setItem("smartagricare_token", data.token);
+      try { localStorage.setItem("smartagricare_token", data.token); } catch { /* ignore */ }
     }
   }, []);
 
   const logout = useCallback(() => {
+    const token = localStorage.getItem("smartagricare_token");
     setUser(null);
-    localStorage.removeItem("smartagricare_user");
-    localStorage.removeItem("smartagricare_token");
+    try { localStorage.removeItem("smartagricare_user"); localStorage.removeItem("smartagricare_token"); } catch { /* ignore */ }
+    // Tell backend to invalidate the token (fire-and-forget)
+    if (token) {
+      fetch(`${import.meta.env.VITE_API_URL || ''}/api/auth/logout`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+      }).catch(() => {});
+    }
   }, []);
 
   const updateUser = useCallback((fields: Partial<Omit<User, 'id' | 'email'>>) => {
     setUser(prev => {
       if (!prev) return prev;
       const updated = { ...prev, ...fields };
-      localStorage.setItem("smartagricare_user", JSON.stringify(updated));
+      try { localStorage.setItem("smartagricare_user", JSON.stringify(updated)); } catch { /* ignore */ }
       return updated;
     });
   }, []);

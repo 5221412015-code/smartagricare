@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -11,10 +12,14 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "dotenv": "^17.2.4",
     "express": "^5.2.1",
-    "mongoose": "^9.2.0"
+    "helmet": "^8.1.0",
+    "nodemailer": "^8.0.1",
+    "sql.js": "^1.14.0",
+    "undici": "^7.22.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.11"

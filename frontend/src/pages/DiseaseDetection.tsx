@@ -1,73 +1,54 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { diseaseAPI } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { useApp } from "@/contexts/AppContext";
 import { t } from "@/lib/i18n";
+import { speak, stopSpeaking } from "@/lib/tts";
 import { useDropzone } from "react-dropzone";
 import MobileLayout from "@/components/MobileLayout";
-import { Camera, Upload, X, ShieldCheck, Info, Calendar, MapPin, ChevronDown, Volume2, VolumeX, Save, CheckCircle } from "lucide-react";
+import { Camera, Upload, X, ShieldCheck, Info, ChevronDown, Volume2, VolumeX, Save, CheckCircle, AlertTriangle, Leaf, Pill, ImageOff } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 
+interface MedEntry {
+  medicine: string;
+  quantity_per_acre: string;
+  water_volume: string;
+  when_to_apply: string;
+  repeat: string;
+  total_duration: string;
+}
+
 interface Result {
+  status?: string;
+  crop?: string;
   disease: string;
   confidence: number;
   cause: string;
   treatment: string[];
+  medication_timeline: MedEntry[];
+  max_sprays: string;
+  is_viral: boolean;
+  viral_note: string;
   stores: string[];
+  message?: string;
 }
-
-const mockResult: Result = {
-  disease: "Late Blight (Phytophthora infestans)",
-  confidence: 94,
-  cause: "Caused by the oomycete pathogen Phytophthora infestans, thriving in cool, moist conditions with temperatures between 10-25°C and high humidity.",
-  treatment: [
-    "Apply copper-based fungicide (Bordeaux mixture) immediately",
-    "Remove and destroy all infected plant parts",
-    "Improve field drainage to reduce moisture",
-    "Space plants adequately for air circulation",
-  ],
-  stores: ["Kisan Agro Store - 1.2 km", "Green Farm Supplies - 2.8 km", "Bharat Seeds & Fertilizers - 4.1 km"],
-};
 
 const SpeakerButton = ({ text, language }: { text: string; language?: string }) => {
   const [speaking, setSpeaking] = useState(false);
-  const utterRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   const toggle = () => {
-    // Native WebView bridge (expo-speech)
-    if ((window as any).__NATIVE_TTS__ && (window as any).ReactNativeWebView) {
-      if (speaking) {
-        (window as any).ReactNativeWebView.postMessage(JSON.stringify({ type: 'NATIVE_TTS_STOP' }));
-        setSpeaking(false);
-      } else {
-        (window as any).ReactNativeWebView.postMessage(JSON.stringify({
-          type: 'NATIVE_TTS_SPEAK', text, language: language || 'en',
-        }));
-        setSpeaking(true);
-        // Auto-reset after estimated duration (native doesn't callback)
-        setTimeout(() => setSpeaking(false), Math.max(3000, text.length * 60));
-      }
-      return;
-    }
-    if (!window.speechSynthesis) return;
     if (speaking) {
-      window.speechSynthesis.cancel();
+      stopSpeaking();
       setSpeaking(false);
     } else {
-      try {
-        window.speechSynthesis.cancel();
-        const utter = new SpeechSynthesisUtterance(text);
-        utterRef.current = utter;
-        utter.rate = 0.95;
-        utter.onend = () => setSpeaking(false);
-        utter.onerror = () => setSpeaking(false);
-        window.speechSynthesis.speak(utter);
-        setSpeaking(true);
-      } catch (e) {
-        console.error("TTS error:", e);
-        setSpeaking(false);
-      }
+      speak({
+        text,
+        language: language || "en",
+        onEnd: () => setSpeaking(false),
+        onError: () => setSpeaking(false),
+      });
+      setSpeaking(true);
     }
   };
 
@@ -92,12 +73,67 @@ const DiseaseDetection = () => {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const cameraInputRef = useRef<HTMLInputElement>(null);
-
-  // Use ref to track current blob URL for cleanup (avoids stale closure)
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   const imageUrlRef = useRef<string | null>(null);
+  const languageRef = useRef(language);
+  languageRef.current = language;
+  const isMountedRef = useRef(true);
+  const [showCamera, setShowCamera] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+      if (imageUrlRef.current) URL.revokeObjectURL(imageUrlRef.current);
+      if (streamRef.current) streamRef.current.getTracks().forEach(t => t.stop());
+      stopSpeaking();
+    };
+  }, []);
+
+  // Attach stream to video element when camera overlay opens
+  useEffect(() => {
+    if (showCamera && streamRef.current && videoRef.current) {
+      const video = videoRef.current;
+      video.srcObject = streamRef.current;
+      video.play().catch(() => {});
+    }
+  }, [showCamera]);
+
+  const openCamera = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 960 } },
+      });
+      streamRef.current = stream;
+      setShowCamera(true);
+    } catch {
+      // Camera not available (desktop or permission denied) — fall back to file input
+      cameraInputRef.current?.click();
+    }
+  }, []);
+
+  const capturePhoto = useCallback(() => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas) return;
+    canvas.width = video.videoWidth || 1280;
+    canvas.height = video.videoHeight || 960;
+    canvas.getContext('2d')?.drawImage(video, 0, 0);
+    // Stop camera stream
+    if (streamRef.current) { streamRef.current.getTracks().forEach(t => t.stop()); streamRef.current = null; }
+    setShowCamera(false);
+    canvas.toBlob(blob => {
+      if (blob) processImage(new File([blob], 'camera-capture.jpg', { type: 'image/jpeg' }));
+    }, 'image/jpeg', 0.9);
+  }, []);
+
+  const closeCamera = useCallback(() => {
+    if (streamRef.current) { streamRef.current.getTracks().forEach(t => t.stop()); streamRef.current = null; }
+    setShowCamera(false);
+  }, []);
 
   const processImage = async (file: File) => {
-    // Revoke previous object URL to avoid memory leak
     if (imageUrlRef.current) URL.revokeObjectURL(imageUrlRef.current);
     const url = URL.createObjectURL(file);
     imageUrlRef.current = url;
@@ -106,33 +142,52 @@ const DiseaseDetection = () => {
     setSaved(false);
     setAnalyzing(true);
     try {
-      const data = await diseaseAPI.detectDisease(file);
-      if (data?.disease) {
-        // Normalize ML response: confidence may be 0-1, treatment may be string
+      const data = await diseaseAPI.detectDisease(file, languageRef.current);
+      if (!isMountedRef.current) return;
+      if (data?.status === 'unrecognized') {
+        setResult({
+          status: 'unrecognized',
+          disease: 'Unrecognized',
+          confidence: data.confidence <= 1 ? Math.round(data.confidence * 100) : Math.round(data.confidence),
+          cause: '',
+          treatment: [],
+          medication_timeline: [],
+          max_sprays: '',
+          is_viral: false,
+          viral_note: '',
+          stores: [],
+          message: data.message || '',
+        });
+      } else if (data?.disease) {
         const rawConf = data.confidence ?? 90;
         const confidence = rawConf <= 1 ? Math.round(rawConf * 100) : Math.round(rawConf);
-        const rawTreatment = data.treatment || mockResult.treatment;
+        const rawTreatment = data.treatment || [];
         const treatment = Array.isArray(rawTreatment) ? rawTreatment : [rawTreatment];
         setResult({
+          status: data.status || 'diseased',
+          crop: data.crop || '',
           disease: data.disease,
           confidence,
-          cause: data.cause || data.description || mockResult.cause,
+          cause: data.cause || data.cause_of_disease || '',
           treatment,
-          stores: data.stores || mockResult.stores,
+          medication_timeline: data.medication_timeline || [],
+          max_sprays: data.max_sprays || '',
+          is_viral: data.is_viral || false,
+          viral_note: data.viral_note || '',
+          stores: data.stores || [],
+          message: data.message || '',
         });
       } else {
         toast.error("Could not identify a disease. Try a clearer image.");
-        setResult(mockResult);
       }
     } catch {
-      toast.error("ML service unavailable. Showing example result.");
-      setResult(mockResult);
+      toast.error("Analysis service unavailable. Please try again.");
     } finally {
-      setAnalyzing(false);
+      if (isMountedRef.current) setAnalyzing(false);
     }
   };
 
-  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+  const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
   const onDrop = (files: File[]) => {
     const file = files[0];
@@ -142,10 +197,6 @@ const DiseaseDetection = () => {
       return;
     }
     processImage(file);
-  };
-
-  const handleCameraCapture = () => {
-    cameraInputRef.current?.click();
   };
 
   const handleCameraFile = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -162,7 +213,7 @@ const DiseaseDetection = () => {
   });
 
   const clear = () => {
-    window.speechSynthesis?.cancel();
+    stopSpeaking();
     if (imageUrlRef.current) URL.revokeObjectURL(imageUrlRef.current);
     imageUrlRef.current = null;
     setImage(null);
@@ -194,51 +245,65 @@ const DiseaseDetection = () => {
     setSaving(false);
   };
 
-  const sections = result ? [
+  const isHealthy = result?.status === 'healthy';
+  const isUnrecognized = result?.status === 'unrecognized';
+
+  const medTimelineSpeakText = result?.medication_timeline?.length
+    ? result.medication_timeline.map(m => `${m.medicine}, ${m.quantity_per_acre} per acre, ${m.when_to_apply}`).join('. ')
+    : '';
+
+  const sections = result && !isHealthy && !isUnrecognized ? [
+    ...(result.is_viral ? [{
+      key: "viral",
+      icon: AlertTriangle,
+      title: t('viral_warning', language),
+      speakText: result.viral_note,
+      content: <p className="text-sm text-orange-400 font-medium">{result.viral_note}</p>,
+    }] : []),
     {
       key: "cause",
       icon: Info,
       title: t('cause_of_disease', language),
       speakText: result.cause,
-      content: <p className="text-sm text-muted-foreground">{result.cause}</p>,
+      content: (
+        <div>
+          {result.crop && <p className="text-xs font-medium text-accent mb-1">{result.crop}</p>}
+          <p className="text-sm text-muted-foreground">{result.cause}</p>
+        </div>
+      ),
     },
     {
       key: "treatment",
       icon: ShieldCheck,
       title: t('treatment', language),
       speakText: result.treatment.join(". "),
-      content: <ol className="list-decimal pl-4 space-y-1 text-sm text-muted-foreground">{result.treatment.map((t, i) => <li key={i}>{t}</li>)}</ol>,
+      content: <ol className="list-decimal pl-4 space-y-1 text-sm text-muted-foreground">{result.treatment.map((step, i) => <li key={i}>{step}</li>)}</ol>,
     },
-    {
-      key: "schedule",
-      icon: Calendar,
-      title: t('medication_timeline', language),
-      speakText: "Day 1: First application. Day 10: Second spray. Day 21: Follow-up. Day 30: Assessment.",
+    ...(result.medication_timeline.length > 0 ? [{
+      key: "medication",
+      icon: Pill,
+      title: t('medication_schedule', language),
+      speakText: medTimelineSpeakText,
       content: (
-        <div className="space-y-2">
-          {["Day 1: First application", "Day 10: Second spray", "Day 21: Follow-up", "Day 30: Assessment"].map((s, i) => (
-            <div key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
-              <div className="h-2 w-2 rounded-full bg-accent" />{s}
+        <div className="space-y-3">
+          {result.medication_timeline.map((m, i) => (
+            <div key={i} className="rounded-xl bg-primary-foreground/5 border border-border/50 p-3 space-y-1.5">
+              <p className="text-sm font-semibold text-foreground">{m.medicine}</p>
+              <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                <span>{t('quantity', language)}: <span className="text-foreground">{m.quantity_per_acre}</span></span>
+                <span>{t('water', language)}: <span className="text-foreground">{m.water_volume}</span></span>
+                <span>{t('when', language)}: <span className="text-foreground">{m.when_to_apply}</span></span>
+                <span>{t('repeat', language)}: <span className="text-foreground">{m.repeat}</span></span>
+              </div>
+              <p className="text-xs text-muted-foreground">{t('duration', language)}: <span className="text-foreground">{m.total_duration}</span></p>
             </div>
           ))}
+          {result.max_sprays && (
+            <p className="text-xs text-muted-foreground pt-1">{t('max_sprays', language)}: <span className="font-medium text-foreground">{result.max_sprays}</span></p>
+          )}
         </div>
       ),
-    },
-    {
-      key: "stores",
-      icon: MapPin,
-      title: t('nearby_stores', language),
-      speakText: result.stores.join(". "),
-      content: (
-        <div className="space-y-2">
-          {result.stores.map((s, i) => (
-            <div key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
-              <MapPin className="h-3 w-3 text-accent" />{s}
-            </div>
-          ))}
-        </div>
-      ),
-    },
+    }] : []),
   ] : [];
 
   return (
@@ -247,12 +312,31 @@ const DiseaseDetection = () => {
         <h1 className="text-xl font-bold text-foreground mb-1">{t('disease_detection', language)}</h1>
         <p className="text-sm text-muted-foreground mb-5">{t('upload_diagnose', language)}</p>
 
-        {/* Hidden camera input for mobile */}
         <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleCameraFile} />
+        <canvas ref={canvasRef} className="hidden" />
+
+        {/* Live Camera Viewfinder */}
+        <AnimatePresence>
+          {showCamera && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] bg-black flex flex-col">
+              <video ref={videoRef} autoPlay playsInline muted className="flex-1 object-cover w-full h-full" />
+              <div className="absolute bottom-0 inset-x-0 flex items-center justify-center gap-8 pb-12 pt-6 bg-gradient-to-t from-black/90 via-black/50 to-transparent">
+                <button onClick={closeCamera} className="flex h-14 w-14 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm text-white active:scale-90 transition-transform">
+                  <X className="h-7 w-7" />
+                </button>
+                <button onClick={capturePhoto} className="flex h-20 w-20 items-center justify-center rounded-full border-[5px] border-white bg-white/20 backdrop-blur-sm active:scale-90 transition-transform">
+                  <div className="h-14 w-14 rounded-full bg-white" />
+                </button>
+                <div className="w-14" /> {/* spacer for centering */}
+              </div>
+              <p className="absolute bottom-3 left-0 right-0 text-center text-white/60 text-xs">Tap the circle to capture</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {!image ? (
           <div className="flex flex-col gap-3">
-            <button onClick={handleCameraCapture} className="flex items-center gap-3 rounded-2xl bg-card p-5 shadow-card transition-transform active:scale-[0.98]">
+            <button onClick={openCamera} className="flex items-center gap-3 rounded-2xl bg-card p-5 shadow-card transition-transform active:scale-[0.98]">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10"><Camera className="h-6 w-6 text-accent" /></div>
               <div className="text-left"><p className="font-semibold text-foreground">{t('take_photo', language)}</p><p className="text-xs text-muted-foreground">{t('use_camera', language)}</p></div>
             </button>
@@ -276,7 +360,38 @@ const DiseaseDetection = () => {
             </div>
 
             <AnimatePresence>
-              {result && (
+              {result && isHealthy && (
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+                  <div className="rounded-2xl bg-green-500/10 border border-green-500/30 p-5 text-center space-y-2">
+                    <Leaf className="h-10 w-10 text-green-500 mx-auto" />
+                    <h2 className="text-lg font-bold text-green-500">{t('healthy_crop', language)}</h2>
+                    {result.crop && <p className="text-sm font-medium text-foreground">{result.crop}</p>}
+                    <p className="text-sm text-muted-foreground">{result.message || t('no_disease_detected', language)}</p>
+                    <div className="flex items-center justify-center gap-2 pt-1">
+                      <span className="text-xs text-muted-foreground">{t('confidence', language)}:</span>
+                      <span className="text-sm font-bold text-green-500">{result.confidence}%</span>
+                    </div>
+                  </div>
+                  <button onClick={clear} className="w-full rounded-xl bg-primary py-3 text-sm font-medium text-primary-foreground">{t('scan_another', language)}</button>
+                </motion.div>
+              )}
+
+              {result && isUnrecognized && (
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+                  <div className="rounded-2xl bg-orange-500/10 border border-orange-500/30 p-5 text-center space-y-2">
+                    <ImageOff className="h-10 w-10 text-orange-500 mx-auto" />
+                    <h2 className="text-lg font-bold text-orange-500">{t('not_recognized', language)}</h2>
+                    <p className="text-sm text-muted-foreground">{result.message || t('not_plant_image', language)}</p>
+                    <div className="flex items-center justify-center gap-2 pt-1">
+                      <span className="text-xs text-muted-foreground">{t('confidence', language)}:</span>
+                      <span className="text-sm font-bold text-orange-500">{result.confidence}%</span>
+                    </div>
+                  </div>
+                  <button onClick={clear} className="w-full rounded-xl bg-primary py-3 text-sm font-medium text-primary-foreground">{t('scan_another', language)}</button>
+                </motion.div>
+              )}
+
+              {result && !isHealthy && !isUnrecognized && (
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="rounded-full bg-accent/20 px-3 py-1 text-xs font-medium text-accent">{t('analysis_complete', language)}</span>
@@ -292,18 +407,18 @@ const DiseaseDetection = () => {
                     </div>
                   </div>
 
+                  {result.crop && <p className="text-xs font-medium text-accent">{result.crop}</p>}
                   <h2 className="text-lg font-bold text-foreground">{result.disease}</h2>
 
-                  {/* Accordion sections with speaker */}
                   {sections.map(section => (
                     <div key={section.key} className="rounded-2xl bg-card shadow-card overflow-hidden">
                       <div className="flex w-full items-center gap-3 p-4">
-                        <section.icon className="h-5 w-5 text-accent shrink-0" />
+                        <section.icon className={`h-5 w-5 shrink-0 ${section.key === 'viral' ? 'text-orange-400' : 'text-accent'}`} />
                         <button
                           onClick={() => toggle(section.key)}
                           className="flex flex-1 items-center text-left"
                         >
-                          <span className="flex-1 text-sm font-semibold text-foreground">{section.title}</span>
+                          <span className={`flex-1 text-sm font-semibold ${section.key === 'viral' ? 'text-orange-400' : 'text-foreground'}`}>{section.title}</span>
                           <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform mr-2 ${openSections.has(section.key) ? "rotate-180" : ""}`} />
                         </button>
                         <SpeakerButton text={section.speakText} language={language} />

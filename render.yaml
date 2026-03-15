@@ -1,7 +1,7 @@
 services:
   - type: web
     name: smartagricare
-    runtime: node
+    env: node
     plan: free
     buildCommand: cd frontend && npm install && npm run build && cd ../backend && npm install
     startCommand: cd backend && node index.js
@@ -9,7 +9,36 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-2.0-flash
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GROQ_MODEL
+        value: llama-3.3-70b-versatile
+      - key: SAMBANOVA_API_KEY
+        sync: false
+      - key: SAMBANOVA_MODEL
+        value: Meta-Llama-3.1-70B-Instruct
       - key: SMTP_EMAIL
         sync: false
       - key: SMTP_PASSWORD
         sync: false
+      - key: ML_SERVICE_URL
+        fromService:
+          name: smartagricare-ml
+          type: pserv
+          property: host
+  - type: pserv
+    name: smartagricare-ml
+    env: python
+    plan: free
+    buildCommand: cd ml-service && pip install -r requirements.txt
+    startCommand: cd ml-service && gunicorn --bind 0.0.0.0:5001 --workers 1 --threads 4 --timeout 120 app:app
+    envVars:
+      - key: BACKEND_URL
+        fromService:
+          name: smartagricare
+          type: web
+          property: url

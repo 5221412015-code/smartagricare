@@ -1,13 +1,15 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { voiceAPI } from "@/services/api";
 import { useApp } from "@/contexts/AppContext";
 import { t } from "@/lib/i18n";
+import { speak, stopSpeaking, cleanForTts } from "@/lib/tts";
 import MobileLayout from "@/components/MobileLayout";
 import { Mic, MicOff, Volume2, VolumeX, Send, User, Bot, Keyboard, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 
 interface Message {
+  id: string;
   role: "user" | "assistant";
   text: string;
 }
@@ -30,25 +32,57 @@ const VoiceAssistant = () => {
   const [speechSupported, setSpeechSupported] = useState(false);
   const recognitionRef = useRef<any>(null);
   const listRef = useRef<HTMLDivElement>(null);
-  const handleQueryRef = useRef<(query: string) => void>(() => {});
+  const isSpeakingRef = useRef(false);
+  const micCooldownRef = useRef(false);
+  const msgIdCounter = useRef(0);
 
-  const handleQuery = async (query: string) => {
+  const nextId = () => `msg-${Date.now()}-${++msgIdCounter.current}`;
+
+  // Use ref for messages so recognition callback always has latest
+  const messagesRef = useRef<Message[]>([]);
+  messagesRef.current = messages;
+
+  const speakText = useCallback((text: string) => {
+    stopSpeaking();
+    isSpeakingRef.current = true;
+    speak({
+      text: cleanForTts(text),
+      language,
+      onEnd: () => { isSpeakingRef.current = false; },
+      onError: () => { isSpeakingRef.current = false; },
+    });
+  }, [language]);
+
+  const handleQuery = useCallback(async (query: string) => {
     if (!query.trim()) return;
-    setMessages(prev => [...prev, { role: "user", text: query }]);
+    // Stop any ongoing TTS
+    stopSpeaking();
+    isSpeakingRef.current = false;
+
+    const userMsg: Message = { id: nextId(), role: "user", text: query };
+    setMessages(prev => [...prev, userMsg]);
     setProcessing(true);
     try {
-      const data = await voiceAPI.processQuery(query, language);
+      const history = [...messagesRef.current, userMsg].map(m => ({ role: m.role, content: m.text }));
+      const data = await voiceAPI.processQuery(query, language, history);
       const response = data?.response || "I couldn't process that request. Please try again.";
-      setMessages(prev => [...prev, { role: "assistant", text: response }]);
-      if (autoSpeak) speakText(response);
+      setMessages(prev => [...prev, { id: nextId(), role: "assistant", text: response }]);
+      if (autoSpeak) {
+        // Small delay to let state update, then speak
+        setTimeout(() => speakText(response), 150);
+      }
     } catch {
       const fallback = "Sorry, I encountered an error. Please try again.";
-      setMessages(prev => [...prev, { role: "assistant", text: fallback }]);
+      setMessages(prev => [...prev, { id: nextId(), role: "assistant", text: fallback }]);
+      if (autoSpeak) {
+        setTimeout(() => speakText(fallback), 150);
+      }
     }
     setProcessing(false);
-  };
+  }, [language, autoSpeak, speakText]);
 
-  // Keep ref in sync so SpeechRecognition callback always calls the latest version
+  // Keep a stable ref for use in recognition callback
+  const handleQueryRef = useRef(handleQuery);
   handleQueryRef.current = handleQuery;
 
   useEffect(() => {
@@ -62,11 +96,20 @@ const VoiceAssistant = () => {
       rec.lang = langMap[language] || "en-US";
 
       rec.onresult = (e: any) => {
-        const transcript = e.results[0][0].transcript;
+        const transcript = e.results[0]?.[0]?.transcript;
+        if (transcript) {
+          handleQueryRef.current(transcript);
+        }
         setListening(false);
-        handleQueryRef.current(transcript);
       };
-      rec.onerror = () => setListening(false);
+      rec.onerror = (e: any) => {
+        console.warn("Speech recognition error:", e.error);
+        setListening(false);
+        if (e.error === 'not-allowed') {
+          toast.error("Microphone permission denied. Please allow microphone access.");
+          setShowTextInput(true);
+        }
+      };
       rec.onend = () => setListening(false);
       recognitionRef.current = rec;
     } else {
@@ -74,9 +117,8 @@ const VoiceAssistant = () => {
       setShowTextInput(true);
     }
     return () => {
-      // Stop old recognition instance before creating new one
       recognitionRef.current?.abort?.();
-      window.speechSynthesis?.cancel();
+      stopSpeaking();
     };
   }, [language]);
 
@@ -84,55 +126,55 @@ const VoiceAssistant = () => {
     if (listRef.current) listRef.current.scrollTop = listRef.current.scrollHeight;
   }, [messages, processing]);
 
-  const toggleListening = () => {
+  const toggleListening = useCallback(() => {
+    // Debounce rapid taps (500ms cooldown)
+    if (micCooldownRef.current) return;
+    micCooldownRef.current = true;
+    setTimeout(() => { micCooldownRef.current = false; }, 500);
+
     if (!recognitionRef.current) {
       setShowTextInput(true);
       return;
     }
+
     if (listening) {
       recognitionRef.current.stop();
       setListening(false);
-    } else {
+      return;
+    }
+
+    // Stop any ongoing TTS before starting recognition
+    stopSpeaking();
+    isSpeakingRef.current = false;
+
+    // Small delay to ensure TTS audio is fully stopped before mic activates
+    setTimeout(() => {
       try {
         recognitionRef.current.start();
         setListening(true);
       } catch {
-        recognitionRef.current.stop();
+        // Already started — stop and retry
+        try {
+          recognitionRef.current.stop();
+        } catch { /* ignore */ }
         setTimeout(() => {
-          recognitionRef.current.start();
-          setListening(true);
-        }, 200);
+          try {
+            recognitionRef.current.start();
+            setListening(true);
+          } catch {
+            toast.error("Could not start microphone. Try the text input.");
+            setShowTextInput(true);
+          }
+        }, 300);
       }
-    }
-  };
+    }, 100);
+  }, [listening]);
 
-  const handleTextSubmit = () => {
+  const handleTextSubmit = useCallback(() => {
     if (!textInput.trim()) return;
     handleQuery(textInput.trim());
     setTextInput("");
-  };
-
-  const speakText = (text: string) => {
-    try {
-      // Native WebView bridge (expo-speech)
-      if ((window as any).__NATIVE_TTS__ && (window as any).ReactNativeWebView) {
-        (window as any).ReactNativeWebView.postMessage(JSON.stringify({
-          type: 'NATIVE_TTS_SPEAK', text, language,
-        }));
-        return;
-      }
-      if (!window.speechSynthesis) return; // Silently skip if no TTS available
-      window.speechSynthesis.cancel();
-      const utter = new SpeechSynthesisUtterance(text);
-      utter.rate = 0.95;
-      const langMap: Record<string, string> = { en: "en-US", hi: "hi-IN", te: "te-IN" };
-      utter.lang = langMap[language] || "en-US";
-      utter.onerror = (e) => console.error("TTS Error:", e);
-      window.speechSynthesis.speak(utter);
-    } catch (e) {
-      console.error("TTS Exception:", e);
-    }
-  };
+  }, [textInput, handleQuery]);
 
   return (
     <MobileLayout>
@@ -174,9 +216,9 @@ const VoiceAssistant = () => {
             </div>
           )}
 
-          {messages.map((m, i) => (
+          {messages.map((m) => (
             <motion.div
-              key={i}
+              key={m.id}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               className={`flex gap-2 ${m.role === "user" ? "justify-end" : "justify-start"}`}
@@ -194,10 +236,13 @@ const VoiceAssistant = () => {
                 {m.text}
                 {m.role === "assistant" && (
                   <button
-                    onClick={() => speakText(m.text)}
-                    className="mt-2 flex items-center gap-1 text-xs text-accent"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      speakText(m.text);
+                    }}
+                    className="mt-2 flex items-center gap-1 text-xs text-accent hover:text-accent/80 active:scale-95 py-1"
                   >
-                    <Volume2 className="h-3 w-3" /> Listen
+                    <Volume2 className="h-3.5 w-3.5" /> {t('listen', language)}
                   </button>
                 )}
               </div>

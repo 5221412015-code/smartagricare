@@ -2,6 +2,7 @@
   "expo": {
     "name": "SmartAgriCare",
     "slug": "smartagricare",
+    "owner": "sac_0011",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -30,6 +31,11 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "e9f6ade9-3a8d-46aa-b445-9c2a447a39f1"
+      }
     }
   }
 }
