@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { SafeAreaView, StyleSheet, Platform, ActivityIndicator, View, Text } from 'react-native';
+import { SafeAreaView, StyleSheet, Platform, ActivityIndicator, View, Text, PermissionsAndroid } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useState, useEffect, useRef } from 'react';
 import * as Location from 'expo-location';
@@ -13,15 +13,66 @@ const DEV_URL = 'http://192.168.55.104:8080';
 const APP_URL = __DEV__ ? DEV_URL : PROD_URL;
 
 export default function App() {
+  const [serverReady, setServerReady] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [statusMsg, setStatusMsg] = useState('Connecting to server...');
   const webviewRef = useRef(null);
-  const SHOW_DEBUG = false; // Set to true to show debug overlay on device
   const [nativeLoc, setNativeLoc] = useState(null);
 
-  const addLog = (msg) => {
-    console.log(msg);
-  };
+  // Poll /api/health until server is awake (skips Render's interstitial page)
+  useEffect(() => {
+    let cancelled = false;
+    let attempts = 0;
+
+    const checkServer = async () => {
+      while (!cancelled) {
+        attempts++;
+        try {
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 8000);
+          const res = await fetch(`${APP_URL}/api/health`, { signal: controller.signal });
+          clearTimeout(timeout);
+
+          if (res.ok) {
+            const data = await res.json();
+            if (data.status === 'ok') {
+              if (!cancelled) {
+                setStatusMsg('Loading app...');
+                setServerReady(true);
+              }
+              return;
+            }
+          }
+        } catch {
+          // Server still waking up
+        }
+
+        if (cancelled) return;
+
+        if (attempts <= 3) {
+          setStatusMsg('Waking up server...');
+        } else if (attempts <= 8) {
+          setStatusMsg('Almost ready...');
+        } else if (attempts > 15) {
+          if (!cancelled) setError(true);
+          return;
+        }
+
+        // Wait 3 seconds before retrying
+        await new Promise(r => setTimeout(r, 3000));
+      }
+    };
+
+    // In dev, server is usually already running — skip polling
+    if (__DEV__) {
+      setServerReady(true);
+    } else {
+      checkServer();
+    }
+
+    return () => { cancelled = true; };
+  }, []);
 
   // Handle messages from WebView (TTS requests, etc.)
   const handleWebViewMessage = (event) => {
@@ -44,7 +95,6 @@ export default function App() {
 
   const injectLocation = (loc) => {
     if (loc && webviewRef.current) {
-      addLog(`Injecting: ${loc.coords.latitude.toFixed(4)}`);
       const jsCode = `
         window.postMessage(JSON.stringify({
           type: 'NATIVE_LOCATION',
@@ -60,35 +110,30 @@ export default function App() {
 
   useEffect(() => {
     (async () => {
-      addLog("App Started. Asking Perms...");
       try {
+        // Request location permission
         let { status } = await Location.requestForegroundPermissionsAsync();
-        addLog("Perm Status: " + status);
+        if (status === 'granted') {
+          let location = await Location.getLastKnownPositionAsync({});
+          if (location) setNativeLoc(location);
 
-        if (status !== 'granted') {
-          addLog("DENIED");
-          return;
+          location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+          if (location) {
+            setNativeLoc(location);
+            injectLocation(location);
+          }
         }
+      } catch {
+        // Location error — non-critical
+      }
 
-        addLog("Fetching LastKnown...");
-        let location = await Location.getLastKnownPositionAsync({});
-        if (location) {
-          addLog("Got LastKnown");
-          setNativeLoc(location);
+      // Request microphone permission (Android)
+      if (Platform.OS === 'android') {
+        try {
+          await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.RECORD_AUDIO);
+        } catch {
+          // Mic permission error — non-critical
         }
-
-        addLog("Fetching Current...");
-        // Use high accuracy but with timeout
-        location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
-        if (location) {
-          addLog("Got Current GPS");
-          setNativeLoc(location);
-          injectLocation(location);
-        } else {
-          addLog("Current GPS returned null");
-        }
-      } catch (e) {
-        addLog("ERR: " + e.message);
       }
     })();
   }, []);
@@ -96,9 +141,26 @@ export default function App() {
   if (error) {
     return (
       <SafeAreaView style={styles.center}>
+        <Text style={styles.splashEmoji}>🌱</Text>
         <Text style={styles.errorTitle}>Cannot connect</Text>
-        <Text style={styles.errorMsg}>Check npm run dev</Text>
+        <Text style={styles.errorMsg}>The server may be temporarily unavailable.{'\n'}Please try again in a moment.</Text>
         <Text style={styles.errorUrl}>{APP_URL}</Text>
+      </SafeAreaView>
+    );
+  }
+
+  // Show custom splash while server wakes up
+  if (!serverReady) {
+    return (
+      <SafeAreaView style={styles.splash}>
+        <StatusBar style="light" />
+        <Text style={styles.splashEmoji}>🌱</Text>
+        <Text style={styles.splashTitle}>SmartAgriCare</Text>
+        <Text style={styles.splashSubtitle}>AI-Powered Agriculture</Text>
+        <View style={styles.splashLoaderWrap}>
+          <ActivityIndicator size="large" color="#8BC34A" />
+          <Text style={styles.splashStatus}>{statusMsg}</Text>
+        </View>
       </SafeAreaView>
     );
   }
@@ -108,15 +170,9 @@ export default function App() {
       <StatusBar style="dark" />
       {loading && (
         <View style={styles.loader}>
-          <ActivityIndicator size="large" color="#6B8F3C" />
+          <Text style={styles.splashEmoji}>🌱</Text>
+          <ActivityIndicator size="large" color="#6B8F3C" style={{ marginTop: 16 }} />
           <Text style={styles.loaderText}>Loading...</Text>
-        </View>
-      )}
-
-      {/* DEBUG OVERLAY — disabled by default, flip SHOW_DEBUG to true */}
-      {SHOW_DEBUG && (
-        <View pointerEvents="none" style={styles.debugOverlay}>
-          <Text style={styles.debugText}>Debug enabled</Text>
         </View>
       )}
 
@@ -129,25 +185,36 @@ export default function App() {
         injectedJavaScript={`window.__NATIVE_TTS__ = true; true;`}
         onLoadEnd={() => {
           setLoading(false);
-          addLog("WebView Loaded");
           if (nativeLoc) injectLocation(nativeLoc);
         }}
         onError={(e) => {
           const msg = e.nativeEvent.description || "Unknown Error";
-          addLog("WebView Err: " + msg);
           if (msg.includes("ERR_CONNECTION_REFUSED") || msg.includes("ERR_CLEARTEXT_NOT_PERMITTED")) {
             setError(true);
           }
         }}
-        onHttpError={(e) => {
-          addLog("HTTP Err: " + e.nativeEvent.statusCode);
+        onHttpError={() => {}}
+        onRenderProcessGone={() => {}}
+        // Grant WebView permissions for mic and location
+        onPermissionRequest={(event) => {
+          event.grant();
         }}
-        onRenderProcessGone={() => addLog("WebView Crashed (Render Process Gone)")}
+        // Android: enable geolocation in WebView
+        geolocationEnabled={true}
+        // Allow media capture (microphone)
+        allowsInlineMediaPlayback={true}
+        mediaCapturePermissionGrantType="grant"
         javaScriptEnabled
         domStorageEnabled
+        cacheEnabled={true}
+        cacheMode="LOAD_DEFAULT"
         startInLoadingState={false}
         allowsBackForwardNavigationGestures
         mediaPlaybackRequiresUserAction={false}
+        // Allow mixed content for any API calls
+        mixedContentMode="compatibility"
+        // User agent to avoid CORS issues (looks like a normal browser)
+        userAgent="Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
       />
     </SafeAreaView>
   );
@@ -162,22 +229,38 @@ const styles = StyleSheet.create({
   webview: {
     flex: 1,
   },
-  debugOverlay: {
-    position: 'absolute',
-    bottom: 20,
-    left: 10,
-    right: 10,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    zIndex: 9999,
-    padding: 10,
-    borderRadius: 8,
+  // Custom splash screen (shown while Render wakes up)
+  splash: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#2D6A2E',
   },
-  debugText: {
-    color: '#00FF00',
-    fontSize: 10,
-    fontFamily: 'monospace',
-    marginBottom: 2
+  splashEmoji: {
+    fontSize: 72,
+    marginBottom: 16,
   },
+  splashTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginBottom: 4,
+  },
+  splashSubtitle: {
+    fontSize: 15,
+    color: '#A5D6A7',
+    marginBottom: 48,
+  },
+  splashLoaderWrap: {
+    alignItems: 'center',
+  },
+  splashStatus: {
+    marginTop: 14,
+    fontSize: 14,
+    color: '#C8E6C9',
+    fontWeight: '500',
+  },
+  // WebView loading overlay
   loader: {
     ...StyleSheet.absoluteFillObject,
     justifyContent: 'center',
@@ -191,29 +274,30 @@ const styles = StyleSheet.create({
     color: '#3D5A1E',
     fontWeight: '600',
   },
+  // Error screen
   center: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f5f3ef',
+    backgroundColor: '#2D6A2E',
     padding: 24,
   },
   errorTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
-    color: '#3D5A1E',
+    color: '#FFFFFF',
     marginBottom: 8,
   },
   errorMsg: {
     fontSize: 14,
-    color: '#666',
+    color: '#C8E6C9',
     textAlign: 'center',
     lineHeight: 22,
   },
   errorUrl: {
-    marginTop: 12,
+    marginTop: 16,
     fontSize: 12,
-    color: '#999',
+    color: '#81C784',
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
   },
 });

@@ -187,11 +187,14 @@ app.use(cors({
   origin: (origin, cb) => {
     // No Origin header = same-origin request (browser) or non-browser client — allow
     if (!origin) return cb(null, true);
-    // In production, only allow same-origin (no cross-origin requests)
+    // Android WebView sends Origin: "null" (the literal string) — allow it
+    if (origin === 'null') return cb(null, true);
+    // In production, allow same Render URL + file:// origins (mobile WebView)
     if (IS_PROD) {
-      // Allow Render deploy URL if set, otherwise block all cross-origin
       const renderUrl = process.env.RENDER_EXTERNAL_URL;
       if (renderUrl && origin === renderUrl) return cb(null, true);
+      // Allow file:// origins (Capacitor/Cordova/WebView apps)
+      if (origin.startsWith('file://')) return cb(null, true);
       return cb(new Error('Not allowed by CORS'));
     }
     // Dev: allow configured origins + ngrok tunnels
