@@ -1,0 +1,623 @@
+{
+  "corn_maize": {
+    "healthy": {
+      "status": "healthy",
+      "label": "Healthy",
+      "message": "No Disease Detected. Crop is Healthy."
+    },
+    "cercospora_leaf_spot": {
+      "status": "diseased",
+      "crop": "Corn / Maize",
+      "disease": "Cercospora Leaf Spot (Gray Leaf Spot)",
+      "cause_of_disease": "Caused by the fungus Cercospora zeae-maydis, thriving in warm, humid conditions with heavy dew and temperatures between 22–30°C. Spreads through infected crop debris left in the field. Rectangular, grayish-tan lesions run parallel to leaf veins, reducing photosynthesis and yield.",
+      "treatment": [
+        "Apply Propiconazole 25% EC or Azoxystrobin 23% SC fungicide immediately",
+        "Remove and destroy infected lower leaves",
+        "Improve air circulation by maintaining proper plant spacing",
+        "Avoid overhead irrigation to reduce leaf wetness",
+        "Rotate crops to reduce fungal buildup in soil"
+      ],
+      "medication_timeline": [
+        {
+          "medicine": "Propiconazole 25% EC",
+          "quantity_per_acre": "200 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At first symptom (VT/R1 stage)",
+          "repeat": "Every 14–21 days",
+          "total_duration": "4–6 Weeks"
+        },
+        {
+          "medicine": "Azoxystrobin 23% SC",
+          "quantity_per_acre": "400 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At first symptom",
+          "repeat": "Every 14–21 days",
+          "total_duration": "4–6 Weeks"
+        },
+        {
+          "medicine": "Tebuconazole 25.9% EC",
+          "quantity_per_acre": "200 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At first symptom",
+          "repeat": "Every 14–21 days",
+          "total_duration": "4–6 Weeks"
+        }
+      ],
+      "max_sprays": "2–3 per season"
+    },
+    "common_rust": {
+      "status": "diseased",
+      "crop": "Corn / Maize",
+      "disease": "Common Rust",
+      "cause_of_disease": "Caused by Puccinia sorghi, spreading rapidly through airborne spores in cool, moist weather between 16–23°C. Small, circular to elongated powdery brick-red pustules appear on both leaf surfaces. High humidity and dew on leaves accelerate infection.",
+      "treatment": [
+        "Apply Mancozeb 75% WP or Propiconazole 25% EC immediately at first pustule sighting",
+        "Avoid overhead irrigation as it spreads spores",
+        "Remove heavily infected leaves to reduce spore load",
+        "Use rust-resistant hybrid varieties in next season",
+        "Ensure proper field sanitation after harvest"
+      ],
+      "medication_timeline": [
+        {
+          "medicine": "Mancozeb 75% WP",
+          "quantity_per_acre": "400–600 g",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At first pustule appearance",
+          "repeat": "Every 10–14 days",
+          "total_duration": "3–5 Weeks"
+        },
+        {
+          "medicine": "Chlorothalonil 75% WP",
+          "quantity_per_acre": "300–400 g",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At first pustule appearance",
+          "repeat": "Every 10–14 days",
+          "total_duration": "3–5 Weeks"
+        },
+        {
+          "medicine": "Propiconazole 25% EC",
+          "quantity_per_acre": "200 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At first pustule appearance",
+          "repeat": "Every 10–14 days",
+          "total_duration": "3–5 Weeks"
+        }
+      ],
+      "max_sprays": "2–3 per season"
+    },
+    "northern_leaf_blight": {
+      "status": "diseased",
+      "crop": "Corn / Maize",
+      "disease": "Northern Leaf Blight",
+      "cause_of_disease": "Caused by Exserohilum turcicum, producing large cigar-shaped lesions (2.5–15 cm long) in warm, humid conditions between 18–27°C. Fungal spores overwinter in infected crop debris and spread via wind and rain splashes. Disease starts from lower leaves and moves upward.",
+      "treatment": [
+        "Apply Propiconazole 25% EC or Azoxystrobin + Propiconazole combo immediately",
+        "Apply at tasseling to silking stage — this is the most critical treatment window",
+        "Remove and burn infected plant debris after harvest",
+        "Avoid excessive nitrogen fertilization which promotes disease spread",
+        "Use resistant varieties for future planting"
+      ],
+      "medication_timeline": [
+        {
+          "medicine": "Propiconazole 25% EC",
+          "quantity_per_acre": "200 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At VT (tasseling) stage",
+          "repeat": "After 14 days",
+          "total_duration": "4–6 Weeks"
+        },
+        {
+          "medicine": "Azoxystrobin + Propiconazole (combo)",
+          "quantity_per_acre": "400 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At VT (tasseling) stage",
+          "repeat": "After 14 days",
+          "total_duration": "4–6 Weeks"
+        },
+        {
+          "medicine": "Tebuconazole 25.9% EC",
+          "quantity_per_acre": "200 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At VT (tasseling) stage",
+          "repeat": "After 14 days",
+          "total_duration": "4–6 Weeks"
+        }
+      ],
+      "max_sprays": "2 per season"
+    }
+  },
+
+  "cotton": {
+    "healthy": {
+      "status": "healthy",
+      "label": "Healthy",
+      "message": "No Disease Detected. Crop is Healthy."
+    },
+    "aphids": {
+      "status": "diseased",
+      "crop": "Cotton",
+      "disease": "Aphids",
+      "cause_of_disease": "Caused by Aphis gossypii (cotton aphid), a small soft-bodied insect clustering on leaf undersides and growing tips. Thrives in warm, dry conditions between 20–30°C. Spreads rapidly through winged adults and also transmits viral diseases. Secretes honeydew leading to sooty mold.",
+      "treatment": [
+        "Apply Imidacloprid 17.8% SL or Thiamethoxam 25% WG immediately",
+        "Spray during early morning or evening for best absorption",
+        "Place yellow sticky traps for monitoring and mass trapping",
+        "Avoid excessive nitrogen fertilization which attracts aphids",
+        "Rotate insecticide groups to prevent resistance buildup"
+      ],
+      "medication_timeline": [
+        {
+          "medicine": "Imidacloprid 17.8% SL",
+          "quantity_per_acre": "100 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At first infestation detection",
+          "repeat": "Every 10–15 days",
+          "total_duration": "3–4 Weeks"
+        },
+        {
+          "medicine": "Thiamethoxam 25% WG",
+          "quantity_per_acre": "40 g",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At first infestation detection",
+          "repeat": "Every 10–15 days",
+          "total_duration": "3–4 Weeks"
+        },
+        {
+          "medicine": "Dimethoate 30% EC",
+          "quantity_per_acre": "300 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At first infestation detection",
+          "repeat": "Every 10–15 days",
+          "total_duration": "3–4 Weeks"
+        }
+      ],
+      "max_sprays": "2 per season (rotate chemicals)"
+    },
+    "army_worm": {
+      "status": "diseased",
+      "crop": "Cotton",
+      "disease": "Army Worm",
+      "cause_of_disease": "Caused by larvae of Spodoptera species. Active at night, hiding in soil during daytime. Thrives in warm, humid conditions. Spreads through adult moth flight and egg-laying. Can devastate entire fields within days if undetected causing complete defoliation.",
+      "treatment": [
+        "Apply Chlorpyrifos 20% EC or Emamectin Benzoate 5% SG immediately",
+        "Spray in the evening or early morning when larvae are most active",
+        "Remove and destroy egg masses manually during early infestation",
+        "Use pheromone traps for monitoring adult moth population",
+        "Deep plowing after harvest to expose and kill pupae in soil"
+      ],
+      "medication_timeline": [
+        {
+          "medicine": "Chlorpyrifos 20% EC",
+          "quantity_per_acre": "400–500 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "When larvae are in early instar stage",
+          "repeat": "Every 7–10 days",
+          "total_duration": "2–3 Weeks"
+        },
+        {
+          "medicine": "Emamectin Benzoate 5% SG",
+          "quantity_per_acre": "80–100 g",
+          "water_volume": "200 Litres",
+          "when_to_apply": "When larvae are in early instar stage",
+          "repeat": "Every 7–10 days",
+          "total_duration": "2–3 Weeks"
+        },
+        {
+          "medicine": "Spinosad 45% SC",
+          "quantity_per_acre": "75–100 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "When larvae are in early instar stage",
+          "repeat": "Every 7–10 days",
+          "total_duration": "2–3 Weeks"
+        }
+      ],
+      "max_sprays": "2–3 per season"
+    },
+    "bacterial_blight": {
+      "status": "diseased",
+      "crop": "Cotton",
+      "disease": "Bacterial Blight",
+      "cause_of_disease": "Caused by Xanthomonas axonopodis pv. malvacearum, thriving in warm, wet conditions between 25–35°C. Spreads through rain splash, contaminated farm tools, infected seeds, and working in wet fields. Water-soaked angular spots on leaves turning brown/black are the first visible symptoms.",
+      "treatment": [
+        "Apply Copper Oxychloride 50% WP or Streptomycin + Tetracycline combo immediately",
+        "Avoid working in the field when it is wet to prevent bacterial spread",
+        "Remove and destroy infected leaves and bolls",
+        "Use disease-free certified seeds for future planting",
+        "Disinfect farm tools regularly with bleach solution"
+      ],
+      "medication_timeline": [
+        {
+          "medicine": "Copper Oxychloride 50% WP",
+          "quantity_per_acre": "600 g",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At first symptom appearance",
+          "repeat": "Every 10–14 days",
+          "total_duration": "4–6 Weeks"
+        },
+        {
+          "medicine": "Streptomycin + Tetracycline (combo)",
+          "quantity_per_acre": "100 g",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At first symptom appearance",
+          "repeat": "Every 10–14 days",
+          "total_duration": "4–6 Weeks"
+        },
+        {
+          "medicine": "Kasugamycin (Bacterinol)",
+          "quantity_per_acre": "400 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At first symptom appearance",
+          "repeat": "Every 10–14 days",
+          "total_duration": "4–6 Weeks"
+        }
+      ],
+      "max_sprays": "3 per season"
+    },
+    "powdery_mildew": {
+      "status": "diseased",
+      "crop": "Cotton",
+      "disease": "Powdery Mildew",
+      "cause_of_disease": "Caused by Leveillula taurica, favored by warm days, cool nights, and dry conditions between 20–28°C. Spreads through airborne spores. White to grayish powdery growth develops on upper and lower leaf surfaces. Excessive nitrogen fertilization and dense planting promote rapid spread.",
+      "treatment": [
+        "Apply Sulphur 80% WP or Hexaconazole 5% EC immediately",
+        "Ensure good air circulation through proper plant spacing",
+        "Avoid excessive nitrogen fertilization",
+        "Remove and destroy heavily infected leaves",
+        "Do not spray Sulphur when temperatures exceed 35°C as it may cause phytotoxicity"
+      ],
+      "medication_timeline": [
+        {
+          "medicine": "Sulphur 80% WP",
+          "quantity_per_acre": "600–800 g",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At first sign of white powdery growth",
+          "repeat": "Every 10–14 days",
+          "total_duration": "3–5 Weeks"
+        },
+        {
+          "medicine": "Hexaconazole 5% EC",
+          "quantity_per_acre": "200 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At first sign of white powdery growth",
+          "repeat": "Every 10–14 days",
+          "total_duration": "3–5 Weeks"
+        },
+        {
+          "medicine": "Triadimefon 25% WP",
+          "quantity_per_acre": "200 g",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At first sign of white powdery growth",
+          "repeat": "Every 10–14 days",
+          "total_duration": "3–5 Weeks"
+        }
+      ],
+      "max_sprays": "2–3 per season"
+    },
+    "target_spot": {
+      "status": "diseased",
+      "crop": "Cotton",
+      "disease": "Target Spot",
+      "cause_of_disease": "Caused by Corynespora cassiicola, thriving in high humidity above 80% and temperatures between 25–32°C. Spreads through airborne spores and rain splash. Circular brown lesions with concentric rings give a target-like appearance. Dense canopy conditions that trap moisture significantly accelerate spread.",
+      "treatment": [
+        "Apply Azoxystrobin 23% SC or Thiophanate Methyl 70% WP immediately",
+        "Improve canopy airflow through proper plant spacing",
+        "Avoid excessive irrigation especially on foliage",
+        "Remove and destroy infected leaves promptly",
+        "Apply preventive fungicide sprays during high humidity periods"
+      ],
+      "medication_timeline": [
+        {
+          "medicine": "Azoxystrobin 23% SC",
+          "quantity_per_acre": "400 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At early disease stage",
+          "repeat": "Every 14 days",
+          "total_duration": "4–6 Weeks"
+        },
+        {
+          "medicine": "Thiophanate Methyl 70% WP",
+          "quantity_per_acre": "300 g",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At early disease stage",
+          "repeat": "Every 14 days",
+          "total_duration": "4–6 Weeks"
+        },
+        {
+          "medicine": "Chlorothalonil 75% WP",
+          "quantity_per_acre": "400 g",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At early disease stage",
+          "repeat": "Every 14 days",
+          "total_duration": "4–6 Weeks"
+        }
+      ],
+      "max_sprays": "2–3 per season"
+    }
+  },
+
+  "paddy": {
+    "healthy": {
+      "status": "healthy",
+      "label": "Healthy",
+      "message": "No Disease Detected. Crop is Healthy."
+    },
+    "blast": {
+      "status": "diseased",
+      "crop": "Paddy (Rice)",
+      "disease": "Blast",
+      "cause_of_disease": "Caused by Magnaporthe oryzae, the most destructive rice disease worldwide. Thrives in cool, humid conditions between 20–28°C with heavy dew or rain. Diamond/eye-shaped lesions on leaves (leaf blast) and blackening of neck (neck blast). Excess nitrogen and dense planting worsen the disease.",
+      "treatment": [
+        "Apply Tricyclazole 75% WP or Isoprothiolane 40% EC immediately",
+        "Spray at tillering stage for leaf blast control",
+        "Spray again at panicle initiation stage for neck blast control",
+        "Avoid excess nitrogen fertilization",
+        "Drain the field intermittently to reduce humidity"
+      ],
+      "medication_timeline": [
+        {
+          "medicine": "Tricyclazole 75% WP",
+          "quantity_per_acre": "120–150 g",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At tillering stage and panicle initiation",
+          "repeat": "Every 10–15 days",
+          "total_duration": "4–6 Weeks"
+        },
+        {
+          "medicine": "Isoprothiolane 40% EC",
+          "quantity_per_acre": "300–400 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At tillering stage and panicle initiation",
+          "repeat": "Every 10–15 days",
+          "total_duration": "4–6 Weeks"
+        },
+        {
+          "medicine": "Carbendazim 50% WP",
+          "quantity_per_acre": "200 g",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At tillering stage and panicle initiation",
+          "repeat": "Every 10–15 days",
+          "total_duration": "4–6 Weeks"
+        }
+      ],
+      "max_sprays": "2–3 per season"
+    },
+    "brownspot": {
+      "status": "diseased",
+      "crop": "Paddy (Rice)",
+      "disease": "Brown Spot",
+      "cause_of_disease": "Caused by Bipolaris oryzae, thriving in warm, humid conditions between 25–30°C. Strongly linked to potassium and silicon-deficient soils. Small circular to oval brown spots with a yellow halo appear on leaves, glumes, and grains. Weakened plants due to nutrient stress are most vulnerable.",
+      "treatment": [
+        "Apply Mancozeb 75% WP or Propiconazole 25% EC immediately",
+        "Apply potassium fertilizer to correct soil nutrient deficiency",
+        "Treat seeds with Thiram or Carbendazim before sowing as prevention",
+        "Remove and destroy infected stubble after harvest",
+        "Avoid water stress and maintain proper irrigation"
+      ],
+      "medication_timeline": [
+        {
+          "medicine": "Mancozeb 75% WP",
+          "quantity_per_acre": "400 g",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At early symptom appearance",
+          "repeat": "Every 14 days",
+          "total_duration": "3–4 Weeks"
+        },
+        {
+          "medicine": "Iprodione 50% WP",
+          "quantity_per_acre": "200 g",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At early symptom appearance",
+          "repeat": "Every 14 days",
+          "total_duration": "3–4 Weeks"
+        },
+        {
+          "medicine": "Propiconazole 25% EC",
+          "quantity_per_acre": "200 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At early symptom appearance",
+          "repeat": "Every 14 days",
+          "total_duration": "3–4 Weeks"
+        }
+      ],
+      "max_sprays": "2 per season"
+    },
+    "tungro": {
+      "status": "diseased",
+      "crop": "Paddy (Rice)",
+      "disease": "Tungro",
+      "is_viral": true,
+      "viral_note": "Viral Disease — No Direct Cure. Vector (leafhopper) control is the only management strategy.",
+      "cause_of_disease": "Caused by Rice Tungro Bacilliform Virus (RTBV) and Rice Tungro Spherical Virus (RTSV), transmitted by the green leafhopper Nephotettix virescens. Infected plants show yellow-orange leaf discoloration, severely stunted growth, and reduced tillering. Warm, humid conditions and late transplanting increase infection risk.",
+      "treatment": [
+        "Apply Imidacloprid 17.8% SL immediately to control leafhopper vector",
+        "Apply Carbofuran 3% G in soil at transplanting as a preventive measure",
+        "Remove and destroy all infected plants immediately to prevent spread",
+        "Avoid late transplanting which increases leafhopper exposure",
+        "Use tungro-resistant rice varieties for future planting"
+      ],
+      "medication_timeline": [
+        {
+          "medicine": "Imidacloprid 17.8% SL",
+          "quantity_per_acre": "100 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At transplanting (preventive) and at first leafhopper detection",
+          "repeat": "Every 10–15 days",
+          "total_duration": "4–6 Weeks"
+        },
+        {
+          "medicine": "Buprofezin 25% SC",
+          "quantity_per_acre": "400 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At first leafhopper detection",
+          "repeat": "Every 10–15 days",
+          "total_duration": "4–6 Weeks"
+        },
+        {
+          "medicine": "Carbofuran 3% G",
+          "quantity_per_acre": "6–8 kg",
+          "water_volume": "Soil Application",
+          "when_to_apply": "At transplanting",
+          "repeat": "Once",
+          "total_duration": "Preventive"
+        }
+      ],
+      "max_sprays": "2–3 per season"
+    }
+  },
+
+  "sugarcane": {
+    "healthy": {
+      "status": "healthy",
+      "label": "Healthy",
+      "message": "No Disease Detected. Crop is Healthy."
+    },
+    "mosiac": {
+      "status": "diseased",
+      "crop": "Sugarcane",
+      "disease": "Mosaic",
+      "is_viral": true,
+      "viral_note": "Viral Disease — No Direct Cure. Aphid vector control and removal of infected plants is the only management strategy.",
+      "cause_of_disease": "Caused by Sugarcane Mosaic Virus (SCMV), transmitted by aphids especially Melanaphis sacchari. Leaves show alternating light green and dark green mosaic or streaking patterns. Spreads through infected seed cane and aphid movement. Warm, dry conditions with high aphid populations increase infection risk.",
+      "treatment": [
+        "Apply Imidacloprid 17.8% SL or Thiamethoxam 25% WG immediately to control aphid vector",
+        "Remove and destroy all infected plant stools immediately",
+        "Use only disease-free certified seed cane for planting",
+        "Rogue out infected plants promptly to prevent spread to healthy plants",
+        "Disinfect cutting tools with bleach solution between plants"
+      ],
+      "medication_timeline": [
+        {
+          "medicine": "Imidacloprid 17.8% SL",
+          "quantity_per_acre": "100 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At first aphid detection or early mosaic symptoms",
+          "repeat": "Every 14–21 days",
+          "total_duration": "4–6 Weeks"
+        },
+        {
+          "medicine": "Thiamethoxam 25% WG",
+          "quantity_per_acre": "40 g",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At first aphid detection or early mosaic symptoms",
+          "repeat": "Every 14–21 days",
+          "total_duration": "4–6 Weeks"
+        }
+      ],
+      "max_sprays": "2–3 per season"
+    },
+    "redrot": {
+      "status": "diseased",
+      "crop": "Sugarcane",
+      "disease": "Red Rot",
+      "cause_of_disease": "Caused by Colletotrichum falcatum, the most serious disease of sugarcane. Thrives in warm, humid conditions between 28–32°C. Internal reddening of stalk with white patches and an alcoholic smell. Spreads through infected seed setts, waterlogged soils, and contaminated cutting tools. Most damaging during ratoon crop stage.",
+      "treatment": [
+        "Treat seed setts by soaking in Carbendazim 50% WP solution for 30 minutes before planting",
+        "Apply Propiconazole 25% EC or Hexaconazole 5% EC as field spray at early symptoms",
+        "Remove and burn all infected clumps immediately",
+        "Avoid waterlogging by improving field drainage",
+        "Disinfect all cutting tools with bleach before use"
+      ],
+      "medication_timeline": [
+        {
+          "medicine": "Carbendazim 50% WP (sett dip)",
+          "quantity_per_acre": "100 g in 100 Litres water",
+          "water_volume": "100 Litres",
+          "when_to_apply": "30-minute soak before planting (preventive)",
+          "repeat": "Once pre-planting",
+          "total_duration": "Preventive"
+        },
+        {
+          "medicine": "Propiconazole 25% EC",
+          "quantity_per_acre": "200 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At early field symptom detection",
+          "repeat": "Every 15–20 days",
+          "total_duration": "6–8 Weeks"
+        },
+        {
+          "medicine": "Hexaconazole 5% EC",
+          "quantity_per_acre": "400 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At early field symptom detection",
+          "repeat": "Every 15–20 days",
+          "total_duration": "6–8 Weeks"
+        }
+      ],
+      "max_sprays": "3 per season"
+    },
+    "rust": {
+      "status": "diseased",
+      "crop": "Sugarcane",
+      "disease": "Rust",
+      "cause_of_disease": "Caused by Puccinia melanocephala (Brown Rust) or Puccinia kuehnii (Orange Rust). Spreads through airborne spores in warm, humid conditions between 25–30°C. Small, orange-brown pustules appear on underside of leaves. Wind is the primary carrier. Dense planting and excessive irrigation create ideal conditions for rapid spread.",
+      "treatment": [
+        "Apply Propiconazole 25% EC or Triadimefon 25% WP immediately at early pustule stage",
+        "Avoid overly dense planting to reduce humidity in the canopy",
+        "Remove and destroy heavily infected leaves",
+        "Use rust-resistant sugarcane varieties for future planting",
+        "Apply preventive fungicide sprays during high humidity season"
+      ],
+      "medication_timeline": [
+        {
+          "medicine": "Propiconazole 25% EC",
+          "quantity_per_acre": "200 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At early pustule formation",
+          "repeat": "Every 14 days",
+          "total_duration": "4–6 Weeks"
+        },
+        {
+          "medicine": "Triadimefon 25% WP",
+          "quantity_per_acre": "300 g",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At early pustule formation",
+          "repeat": "Every 14 days",
+          "total_duration": "4–6 Weeks"
+        },
+        {
+          "medicine": "Mancozeb 75% WP",
+          "quantity_per_acre": "500 g",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At early pustule formation",
+          "repeat": "Every 14 days",
+          "total_duration": "4–6 Weeks"
+        }
+      ],
+      "max_sprays": "2–3 per season"
+    },
+    "yellow": {
+      "status": "diseased",
+      "crop": "Sugarcane",
+      "disease": "Yellow Leaf Disease",
+      "is_viral": true,
+      "viral_note": "Viral Disease — No Direct Cure. Aphid vector control and use of certified disease-free planting material is the only management strategy.",
+      "cause_of_disease": "Caused by Sugarcane Yellow Leaf Virus (ScYLV), transmitted by the sugarcane aphid Melanaphis sacchari. Yellowing begins on the midrib on the underside of leaves and progresses to full leaf yellowing. Warm, dry weather with high aphid populations accelerates spread. Causes 10–30% yield loss.",
+      "treatment": [
+        "Apply Imidacloprid 17.8% SL or Dimethoate 30% EC immediately to control aphid vector",
+        "Use only virus-free certified planting material",
+        "Remove and destroy all severely infected plants immediately",
+        "Apply balanced potassium fertilization to support plant recovery",
+        "Monitor aphid population regularly using yellow sticky traps"
+      ],
+      "medication_timeline": [
+        {
+          "medicine": "Imidacloprid 17.8% SL",
+          "quantity_per_acre": "100 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At first aphid detection",
+          "repeat": "Every 14–21 days",
+          "total_duration": "4–6 Weeks"
+        },
+        {
+          "medicine": "Dimethoate 30% EC",
+          "quantity_per_acre": "300 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At first aphid detection",
+          "repeat": "Every 14–21 days",
+          "total_duration": "4–6 Weeks"
+        }
+      ],
+      "max_sprays": "2–3 per season"
+    }
+  }
+}

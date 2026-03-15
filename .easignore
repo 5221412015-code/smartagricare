@@ -1,0 +1,29 @@
+# Exclude non-expo directories
+backend/
+frontend/
+ml-service/
+smartagricarebackend/
+
+# Exclude large/unnecessary files at root
+*.pth
+best_swin_crop_disease.pth
+crop_disease_data.json
+render.yaml
+start.bat
+ngrok.log
+deep-research-report*.md
+AGENTS.md
+README.md
+.git/
+
+# Exclude test artifacts
+_test*
+_backend.log
+_frontend.log
+_ml.log
+proxy_weather_test.json
+smartagricare_voice_assistance*.py
+
+# Inside expo-app, exclude node_modules (EAS installs deps on server)
+expo-app/node_modules/
+expo-app/.expo/
