@@ -67,6 +67,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try { sessionStorage.setItem("smartagricare_coords", JSON.stringify(c)); } catch { /* ignore */ }
   };
 
+  // Listen for native location from Android WebView (injected by Expo App.js)
+  useEffect(() => {
+    const handler = (event: MessageEvent) => {
+      try {
+        const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+        if (data?.type === 'NATIVE_LOCATION' && data.coords) {
+          setCoords(data.coords.latitude, data.coords.longitude);
+        }
+      } catch { /* ignore non-JSON messages */ }
+    };
+    window.addEventListener('message', handler);
+    return () => window.removeEventListener('message', handler);
+  }, []);
+
   // One-time geolocation on app init
   useEffect(() => {
     if (coords) { setCoordsLoading(false); return; }
