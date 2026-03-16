@@ -6,7 +6,7 @@ import { t } from "@/lib/i18n";
 import { speak, stopSpeaking } from "@/lib/tts";
 import { useDropzone } from "react-dropzone";
 import MobileLayout from "@/components/MobileLayout";
-import { Camera, Upload, X, ShieldCheck, Info, ChevronDown, Volume2, VolumeX, Save, CheckCircle, AlertTriangle, Leaf, Pill, ImageOff } from "lucide-react";
+import { Camera, Upload, X, ShieldCheck, Info, ChevronDown, Volume2, VolumeX, Save, CheckCircle, AlertTriangle, Leaf, Pill, ImageOff, Sprout, Bug, Droplets } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 
@@ -32,6 +32,9 @@ interface Result {
   viral_note: string;
   stores: string[];
   message?: string;
+  deficiencies: string[];
+  disorders: string[];
+  natural_organic_treatment: string[];
 }
 
 const SpeakerButton = ({ text, language }: { text: string; language?: string }) => {
@@ -157,6 +160,9 @@ const DiseaseDetection = () => {
           viral_note: '',
           stores: [],
           message: data.message || '',
+          deficiencies: [],
+          disorders: [],
+          natural_organic_treatment: [],
         });
       } else if (data?.disease) {
         const rawConf = data.confidence ?? 90;
@@ -176,6 +182,9 @@ const DiseaseDetection = () => {
           viral_note: data.viral_note || '',
           stores: data.stores || [],
           message: data.message || '',
+          deficiencies: data.deficiencies || [],
+          disorders: data.disorders || [],
+          natural_organic_treatment: data.natural_organic_treatment || [],
         });
       } else {
         toast.error("Could not identify a disease. Try a clearer image.");
@@ -272,13 +281,34 @@ const DiseaseDetection = () => {
         </div>
       ),
     },
+    ...(result.deficiencies.length > 0 ? [{
+      key: "deficiencies",
+      icon: Droplets,
+      title: t('deficiencies', language),
+      speakText: result.deficiencies.join(". "),
+      content: <ul className="list-disc pl-4 space-y-1.5 text-sm text-muted-foreground">{result.deficiencies.map((d, i) => <li key={i}>{d}</li>)}</ul>,
+    }] : []),
+    ...(result.disorders.length > 0 ? [{
+      key: "disorders",
+      icon: Bug,
+      title: t('disorders', language),
+      speakText: result.disorders.join(". "),
+      content: <ul className="list-disc pl-4 space-y-1.5 text-sm text-muted-foreground">{result.disorders.map((d, i) => <li key={i}>{d}</li>)}</ul>,
+    }] : []),
     {
       key: "treatment",
       icon: ShieldCheck,
-      title: t('treatment', language),
+      title: t('chemical_treatment', language),
       speakText: result.treatment.join(". "),
       content: <ol className="list-decimal pl-4 space-y-1 text-sm text-muted-foreground">{result.treatment.map((step, i) => <li key={i}>{step}</li>)}</ol>,
     },
+    ...(result.natural_organic_treatment.length > 0 ? [{
+      key: "organic",
+      icon: Sprout,
+      title: t('organic_treatment', language),
+      speakText: result.natural_organic_treatment.join(". "),
+      content: <ol className="list-decimal pl-4 space-y-1.5 text-sm text-muted-foreground">{result.natural_organic_treatment.map((step, i) => <li key={i}>{step}</li>)}</ol>,
+    }] : []),
     ...(result.medication_timeline.length > 0 ? [{
       key: "medication",
       icon: Pill,

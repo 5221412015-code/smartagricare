@@ -62,6 +62,10 @@ const translations: Record<string, Record<Language, string>> = {
     'confidence': { en: 'Confidence', hi: 'विश्वास', te: 'విశ్వాసం' },
     'not_recognized': { en: 'Image Not Recognized', hi: 'छवि पहचान नहीं हुई', te: 'చిత్రం గుర్తించబడలేదు' },
     'not_plant_image': { en: 'This image does not appear to be a crop leaf. Please upload a clear, close-up photo of the affected leaf.', hi: 'यह छवि फसल की पत्ती नहीं लगती। कृपया प्रभावित पत्ती की स्पष्ट तस्वीर अपलोड करें।', te: 'ఈ చిత్రం పంట ఆకుగా కనిపించడం లేదు. దయచేసి ప్రభావిత ఆకు యొక్క స్పష్టమైన ఫోటో అప్‌లోడ్ చేయండి.' },
+    'deficiencies': { en: 'Nutrient Deficiencies', hi: 'पोषक तत्वों की कमी', te: 'పోషక లోపాలు' },
+    'disorders': { en: 'Plant Disorders', hi: 'पौधों के विकार', te: 'మొక్క రుగ్మతలు' },
+    'organic_treatment': { en: 'Organic / Natural Treatment', hi: 'जैविक / प्राकृतिक उपचार', te: 'సేంద్రీయ / సహజ చికిత్స' },
+    'chemical_treatment': { en: 'Chemical Treatment', hi: 'रासायनिक उपचार', te: 'రసాయన చికిత్స' },
 
     // Crop Recommendation
     'get_ai_suggestions': { en: 'Get AI-based crop suggestions', hi: 'AI आधारित फसल सुझाव प्राप्त करें', te: 'AI ఆధారిత పంట సూచనలు పొందండి' },

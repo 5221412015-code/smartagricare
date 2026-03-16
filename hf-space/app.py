@@ -1,7 +1,8 @@
 """
 SmartAgriCare ML Service — Swin-B Crop Disease Detection
+Deployed on Hugging Face Spaces (Docker SDK).
 Loads a trained Swin Transformer (Base) model and serves predictions
-via Flask API on port 5001. Returns disease data from crop_disease_data.json.
+via Flask API on port 7860. Returns disease data from crop_disease_data.json.
 """
 import os
 import io
@@ -22,9 +23,11 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(mess
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
+# Allow requests from Render backend and local dev
 _cors_origins = [
     'http://localhost:5000',
     'http://127.0.0.1:5000',
+    'https://smartagricare.onrender.com',
 ]
 if os.environ.get('BACKEND_URL'):
     _cors_origins.append(os.environ['BACKEND_URL'])
@@ -41,11 +44,10 @@ _max_concurrent = threading.Semaphore(8)
 # PIL decompression bomb protection
 Image.MAX_IMAGE_PIXELS = 4_000_000  # ~2000x2000 max decoded pixels
 
-# ── Paths ──────────────────────────────────────────────────────
+# ── Paths (all files in same directory on HF Spaces) ─────────
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-ROOT_DIR = os.path.dirname(BASE_DIR)
-MODEL_PATH = os.path.join(ROOT_DIR, 'best_swin_crop_disease.pth')
-DISEASE_DATA_PATH = os.path.join(ROOT_DIR, 'crop_disease_data.json')
+MODEL_PATH = os.path.join(BASE_DIR, 'best_swin_crop_disease.pth')
+DISEASE_DATA_PATH = os.path.join(BASE_DIR, 'crop_disease_data.json')
 
 # ── Load disease data ──────────────────────────────────────────
 with open(DISEASE_DATA_PATH, 'r', encoding='utf-8') as f:
@@ -89,7 +91,6 @@ def is_plant_like(pil_img, min_plant_ratio=0.30):
     Multi-check image validation for crop leaf images.
     Returns (is_plant, details_dict).
     """
-    # Resize directly to 128x128 (avoids full-res copy)
     thumb = pil_img.resize((128, 128))
     arr = np.array(thumb, dtype=np.float32) / 255.0
     thumb.close()
@@ -99,7 +100,6 @@ def is_plant_like(pil_img, min_plant_ratio=0.30):
     cmin = np.minimum(np.minimum(r, g), b)
     delta = cmax - cmin
 
-    # Hue (0-360 degrees)
     hue = np.zeros_like(delta)
     mask = delta > 0
     mask_r = mask & (cmax == r)
@@ -215,7 +215,6 @@ def predict():
 
         file = request.files['image']
 
-        # Check content-length before reading
         content_length = request.content_length or 0
         if content_length > 10 * 1024 * 1024:
             return jsonify({'error': 'Image too large. Maximum size is 10 MB.'}), 413
@@ -226,9 +225,8 @@ def predict():
             logger.warning('Invalid image upload: %s', e)
             return jsonify({'error': 'Invalid image file.'}), 400
 
-        # Reject oversized images
         w, h = img.size
-        if w * h > 4_000_000:  # ~2000x2000 — sufficient for leaf photos
+        if w * h > 4_000_000:
             img.close()
             return jsonify({'error': 'Image dimensions too large. Max ~2000x2000 pixels.'}), 400
 
@@ -255,9 +253,8 @@ def predict():
             })
 
         tensor = transform(img).unsqueeze(0)
-        img.close()  # Explicitly close PIL image before inference
+        img.close()
 
-        # Lock with timeout — return 503 if model is overloaded
         acquired = _inference_lock.acquire(timeout=30)
         if not acquired:
             del tensor
@@ -275,7 +272,6 @@ def predict():
         idx = pred_idx.item()
         conf = round(confidence.item(), 4)
 
-        # ── Layer 3: Confidence + margin + entropy check ──
         probs_np = probs[0].detach().cpu()
         sorted_probs, _ = torch.sort(probs_np, descending=True)
         top1 = sorted_probs[0].item()
@@ -285,7 +281,6 @@ def predict():
         p = probs_np.detach()
         prob_entropy = -torch.sum(p * torch.log(p + 1e-10)).item()
 
-        # Free all tensors
         del tensor, logits, probs, confidence, pred_idx, probs_np, sorted_probs, p
 
         energy_ood = energy > -3.0
@@ -357,7 +352,6 @@ def predict():
         })
 
     finally:
-        # Ensure PIL image always closed even on exceptions
         if img is not None and hasattr(img, 'close'):
             try:
                 img.close()
@@ -367,5 +361,6 @@ def predict():
 
 
 if __name__ == '__main__':
-    logger.info('SmartAgriCare ML Service starting on port 5001...')
-    app.run(host='0.0.0.0', port=5001, debug=False, threaded=True)
+    port = int(os.environ.get('PORT', 7860))
+    logger.info('SmartAgriCare ML Service starting on port %d...', port)
+    app.run(host='0.0.0.0', port=port, debug=False, threaded=True)
