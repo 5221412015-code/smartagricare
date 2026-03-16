@@ -21,7 +21,10 @@ const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
 // --------------- SambaNova LLM fallback (free tier, OpenAI-compatible) ---------------
 const SAMBANOVA_API_KEY = process.env.SAMBANOVA_API_KEY || '';
 const SAMBANOVA_MODEL = process.env.SAMBANOVA_MODEL || 'Meta-Llama-3.1-70B-Instruct';
-const { getDb, save, flushSave, createUser, findUserByEmail, saveDiseaseReport, getUserReports, createResetToken, findValidResetToken, markTokenUsed, updateUserPassword, updateUserProfile, saveAuthToken, findAuthToken, deleteAuthToken, deleteAuthTokensByEmail, purgeExpiredAuthTokens } = require('./db');
+// Auto-switch database: PostgreSQL if DATABASE_URL is set, SQLite otherwise
+const dbModule = process.env.DATABASE_URL ? './db-postgres' : './db';
+console.log(`Database: ${process.env.DATABASE_URL ? 'PostgreSQL' : 'SQLite (local)'}`);
+const { getDb, save, flushSave, createUser, findUserByEmail, saveDiseaseReport, getUserReports, createResetToken, findValidResetToken, markTokenUsed, updateUserPassword, updateUserProfile, saveAuthToken, findAuthToken, deleteAuthToken, deleteAuthTokensByEmail, purgeExpiredAuthTokens } = require(dbModule);
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -30,16 +33,16 @@ const IS_PROD = process.env.NODE_ENV === 'production';
 // Trust reverse proxies (Render, ngrok) so req.ip = real client IP, not proxy IP
 if (IS_PROD) app.set('trust proxy', 1);
 
-// --------------- Token helpers (persistent in SQLite) ---------------
-function generateToken(userId) {
+// --------------- Token helpers (persistent in SQLite/PostgreSQL) ---------------
+async function generateToken(userId) {
   const token = crypto.randomBytes(32).toString('hex');
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
-  saveAuthToken(token, userId, expiresAt);
+  await saveAuthToken(token, userId, expiresAt);
   return token;
 }
 
-function verifyToken(token) {
-  return findAuthToken(token);
+async function verifyToken(token) {
+  return await findAuthToken(token);
 }
 
 // --------------- Rate limiter (in-memory, per-IP, per-endpoint) ---------------
@@ -73,17 +76,17 @@ setInterval(() => {
     }
   }
   // Purge expired auth tokens from DB
-  try { purgeExpiredAuthTokens(); } catch { /* db not ready yet */ }
+  try { purgeExpiredAuthTokens().catch(() => {}); } catch { /* db not ready yet */ }
 }, 300000);
 
 // --------------- Auth middleware ---------------
-function requireAuth(req, res, next) {
+async function requireAuth(req, res, next) {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({ success: false, error: 'Authentication required' });
   }
   const token = authHeader.slice(7);
-  const userId = verifyToken(token);
+  const userId = await verifyToken(token);
   if (!userId) {
     return res.status(401).json({ success: false, error: 'Invalid or expired token' });
   }
@@ -302,12 +305,12 @@ app.post('/api/auth/register', authRateLimit, async (req, res) => {
     if (!email || !email.includes('@')) return res.status(400).json({ success: false, error: 'Valid email required' });
     if (!password || password.length < 6) return res.status(400).json({ success: false, error: 'Password must be at least 6 characters' });
 
-    const existing = findUserByEmail(email);
+    const existing = await findUserByEmail(email);
     if (existing) return res.status(409).json({ success: false, error: 'Email already registered' });
 
     const hash = await bcrypt.hash(password, 10);
-    const user = createUser(name, email, hash);
-    const token = generateToken(user.id);
+    const user = await createUser(name, email, hash);
+    const token = await generateToken(user.id);
 
     res.status(201).json({ success: true, user: { id: user.id, name: user.name, email: user.email }, token });
   } catch (err) {
@@ -324,13 +327,13 @@ app.post('/api/auth/login', authRateLimit, async (req, res) => {
     if (!email) return res.status(400).json({ success: false, error: 'Email is required' });
     if (!password) return res.status(400).json({ success: false, error: 'Password is required' });
 
-    const user = findUserByEmail(email);
+    const user = await findUserByEmail(email);
     if (!user) return res.status(401).json({ success: false, error: 'Invalid email or password' });
 
     const valid = await bcrypt.compare(password, user.password_hash);
     if (!valid) return res.status(401).json({ success: false, error: 'Invalid email or password' });
 
-    const token = generateToken(user.id);
+    const token = await generateToken(user.id);
     res.json({ success: true, user: { id: user.id, name: user.name, email: user.email, location: user.location || '' }, token });
   } catch (err) {
     console.error('Login error:', err);
@@ -354,7 +357,7 @@ app.post('/api/auth/forgot-password', forgotRateLimit, async (req, res) => {
     const email = (req.body.email || '').trim().toLowerCase();
     if (!email) return res.status(400).json({ success: false, error: 'Email is required' });
 
-    const user = findUserByEmail(email);
+    const user = await findUserByEmail(email);
     if (!user) {
       // Don't reveal whether email exists — delay to match real send timing
       await new Promise(r => setTimeout(r, delayRemaining()));
@@ -364,7 +367,7 @@ app.post('/api/auth/forgot-password', forgotRateLimit, async (req, res) => {
     // Generate 6-digit OTP
     const otp = String(crypto.randomInt(100000, 1000000));
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 min
-    createResetToken(email, otp, expiresAt);
+    await createResetToken(email, otp, expiresAt);
 
     // Try to send email
     if (emailConfigured) {
@@ -401,14 +404,14 @@ app.post('/api/auth/reset-password', resetRateLimit, async (req, res) => {
     if (!email || !otp || !newPassword) return res.status(400).json({ success: false, error: 'Email, OTP, and new password are required' });
     if (newPassword.length < 6) return res.status(400).json({ success: false, error: 'Password must be at least 6 characters' });
 
-    const tokenId = findValidResetToken(email, otp);
+    const tokenId = await findValidResetToken(email, otp);
     if (!tokenId) return res.status(400).json({ success: false, error: 'Invalid or expired reset code' });
 
     const hash = await bcrypt.hash(newPassword, 10);
-    updateUserPassword(email, hash);
-    markTokenUsed(tokenId);
+    await updateUserPassword(email, hash);
+    await markTokenUsed(tokenId);
     // Invalidate all existing auth tokens for this user (force re-login)
-    deleteAuthTokensByEmail(email);
+    await deleteAuthTokensByEmail(email);
 
     res.json({ success: true, message: 'Password reset successful. You can now login.' });
   } catch (err) {
@@ -418,11 +421,11 @@ app.post('/api/auth/reset-password', resetRateLimit, async (req, res) => {
 });
 
 // --- Profile Update ---
-app.put('/api/auth/profile', requireAuth, (req, res) => {
+app.put('/api/auth/profile', requireAuth, async (req, res) => {
   try {
     const userId = req.userId; // From auth middleware, not from body
     const { name, phone, location } = req.body;
-    const updated = updateUserProfile(userId, {
+    const updated = await updateUserProfile(userId, {
       name: name?.trim(),
       phone: phone?.trim(),
       location: location?.trim(),
@@ -436,18 +439,18 @@ app.put('/api/auth/profile', requireAuth, (req, res) => {
 });
 
 // --- Auth: Logout ---
-app.post('/api/auth/logout', requireAuth, (req, res) => {
+app.post('/api/auth/logout', requireAuth, async (req, res) => {
   const token = req.headers.authorization.slice(7);
-  deleteAuthToken(token);
+  await deleteAuthToken(token);
   res.json({ success: true, message: 'Logged out' });
 });
 
 // --- Disease Reports ---
-app.post('/api/disease/report', requireAuth, (req, res) => {
+app.post('/api/disease/report', requireAuth, async (req, res) => {
   try {
     const { disease, confidence, cause, treatment, stores, imageName } = req.body;
     if (!disease) return res.status(400).json({ success: false, error: 'Disease name is required' });
-    const id = saveDiseaseReport(req.userId, { disease, confidence, cause, treatment, stores, imageName });
+    const id = await saveDiseaseReport(req.userId, { disease, confidence, cause, treatment, stores, imageName });
     res.status(201).json({ success: true, reportId: id });
   } catch (err) {
     console.error('Save report error:', err);
@@ -455,9 +458,9 @@ app.post('/api/disease/report', requireAuth, (req, res) => {
   }
 });
 
-app.get('/api/disease/reports', requireAuth, (req, res) => {
+app.get('/api/disease/reports', requireAuth, async (req, res) => {
   try {
-    const reports = getUserReports(req.userId);
+    const reports = await getUserReports(req.userId);
     res.json({ success: true, reports });
   } catch (err) {
     console.error('Get reports error:', err);

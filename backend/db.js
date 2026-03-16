@@ -132,27 +132,27 @@ function save() {
     fs.renameSync(tmpPath, DB_PATH);
 }
 
-// --- User helpers ---
-function createUser(name, email, passwordHash) {
+// --- User helpers (async for compatibility with PostgreSQL) ---
+async function createUser(name, email, passwordHash) {
     db.run('INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)', [name, email, passwordHash]);
     debouncedSave();
     const row = db.exec('SELECT id, name, email, location FROM users WHERE email = ?', [email]);
     return row[0]?.values[0] ? { id: row[0].values[0][0], name: row[0].values[0][1], email: row[0].values[0][2], location: row[0].values[0][3] } : null;
 }
 
-function findUserByEmail(email) {
+async function findUserByEmail(email) {
     const row = db.exec('SELECT id, name, email, password_hash, phone, location FROM users WHERE email = ?', [email]);
     if (!row[0]?.values[0]) return null;
     const [id, name, em, password_hash, phone, location] = row[0].values[0];
     return { id, name, email: em, password_hash, phone, location };
 }
 
-// --- Disease report helpers ---
+// --- Disease report helpers (async for compatibility with PostgreSQL) ---
 function safeParse(val) {
     try { return JSON.parse(val || '[]'); } catch { return []; }
 }
 
-function saveDiseaseReport(userId, report) {
+async function saveDiseaseReport(userId, report) {
     db.run(
         'INSERT INTO disease_reports (user_id, disease, confidence, cause, treatment, stores, image_name) VALUES (?, ?, ?, ?, ?, ?, ?)',
         [userId, report.disease, report.confidence, report.cause, JSON.stringify(report.treatment), JSON.stringify(report.stores), report.imageName || '']
@@ -162,7 +162,7 @@ function saveDiseaseReport(userId, report) {
     return row[0]?.values[0]?.[0];
 }
 
-function getUserReports(userId, limit = 50, offset = 0) {
+async function getUserReports(userId, limit = 50, offset = 0) {
     const rows = db.exec(
         'SELECT id, disease, confidence, cause, treatment, stores, image_name, created_at FROM disease_reports WHERE user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?',
         [userId, limit, offset]
@@ -175,13 +175,13 @@ function getUserReports(userId, limit = 50, offset = 0) {
     }));
 }
 
-// --- Password reset helpers ---
-function createResetToken(email, token, expiresAt) {
+// --- Password reset helpers (async for compatibility with PostgreSQL) ---
+async function createResetToken(email, token, expiresAt) {
     db.run('INSERT INTO password_reset_tokens (email, token, expires_at) VALUES (?, ?, ?)', [email, token, expiresAt]);
     debouncedSave();
 }
 
-function findValidResetToken(email, token) {
+async function findValidResetToken(email, token) {
     const row = db.exec(
         "SELECT id FROM password_reset_tokens WHERE email = ? AND token = ? AND used = 0 AND expires_at > datetime('now')",
         [email, token]
@@ -189,17 +189,17 @@ function findValidResetToken(email, token) {
     return row[0]?.values[0] ? row[0].values[0][0] : null;
 }
 
-function markTokenUsed(tokenId) {
+async function markTokenUsed(tokenId) {
     db.run('UPDATE password_reset_tokens SET used = 1 WHERE id = ?', [tokenId]);
     debouncedSave();
 }
 
-function updateUserPassword(email, passwordHash) {
+async function updateUserPassword(email, passwordHash) {
     db.run('UPDATE users SET password_hash = ? WHERE email = ?', [passwordHash, email]);
     debouncedSave();
 }
 
-function updateUserProfile(userId, fields) {
+async function updateUserProfile(userId, fields) {
     const allowed = ['name', 'phone', 'location'];
     const updates = [];
     const values = [];
@@ -216,15 +216,15 @@ function updateUserProfile(userId, fields) {
     return true;
 }
 
-// --- Auth token helpers (persistent across restarts) ---
-function saveAuthToken(token, userId, expiresAt) {
+// --- Auth token helpers (persistent across restarts, async for PostgreSQL compat) ---
+async function saveAuthToken(token, userId, expiresAt) {
     // Single session: delete existing tokens for this user before creating new one
     db.run('DELETE FROM auth_tokens WHERE user_id = ?', [userId]);
     db.run('INSERT INTO auth_tokens (token, user_id, expires_at) VALUES (?, ?, ?)', [token, userId, expiresAt]);
     debouncedSave();
 }
 
-function findAuthToken(token) {
+async function findAuthToken(token) {
     const row = db.exec(
         "SELECT user_id FROM auth_tokens WHERE token = ? AND expires_at > datetime('now')",
         [token]
@@ -232,12 +232,12 @@ function findAuthToken(token) {
     return row[0]?.values[0] ? row[0].values[0][0] : null;
 }
 
-function deleteAuthToken(token) {
+async function deleteAuthToken(token) {
     db.run('DELETE FROM auth_tokens WHERE token = ?', [token]);
     debouncedSave();
 }
 
-function deleteAuthTokensByEmail(email) {
+async function deleteAuthTokensByEmail(email) {
     const row = db.exec('SELECT id FROM users WHERE email = ?', [email]);
     const userId = row[0]?.values[0]?.[0];
     if (userId) {
@@ -246,7 +246,7 @@ function deleteAuthTokensByEmail(email) {
     }
 }
 
-function purgeExpiredAuthTokens() {
+async function purgeExpiredAuthTokens() {
     db.run("DELETE FROM auth_tokens WHERE expires_at <= datetime('now')");
     db.run("DELETE FROM password_reset_tokens WHERE used = 1 OR expires_at <= datetime('now')");
     debouncedSave();
