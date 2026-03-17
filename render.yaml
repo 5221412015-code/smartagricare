@@ -1,8 +1,3 @@
-databases:
-  - name: smartagricare-db
-    plan: free
-    databaseName: smartagricare
-
 services:
   - type: web
     name: smartagricare
@@ -15,9 +10,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
-        fromDatabase:
-          name: smartagricare-db
-          property: connectionString
+        sync: false
       - key: GEMINI_API_KEY
         sync: false
       - key: GEMINI_MODEL
@@ -35,19 +28,4 @@ services:
       - key: SMTP_PASSWORD
         sync: false
       - key: ML_SERVICE_URL
-        fromService:
-          name: smartagricare-ml
-          type: pserv
-          property: host
-  - type: pserv
-    name: smartagricare-ml
-    env: python
-    plan: free
-    buildCommand: cd ml-service && pip install -r requirements.txt
-    startCommand: cd ml-service && gunicorn --bind 0.0.0.0:5001 --workers 1 --threads 4 --timeout 120 app:app
-    envVars:
-      - key: BACKEND_URL
-        fromService:
-          name: smartagricare
-          type: web
-          property: host
+        sync: false
