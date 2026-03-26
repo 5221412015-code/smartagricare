@@ -300,6 +300,18 @@ const WEATHER_CODES = {
 // --- Health ---
 app.get('/api/health', (_req, res) => res.json({ status: 'ok', service: 'SmartAgriCare Backend', timestamp: new Date().toISOString() }));
 
+// Debug endpoint to test external API calls
+app.get('/api/debug/fetch', async (_req, res) => {
+  try {
+    const testUrl = 'https://api.open-meteo.com/v1/forecast?latitude=17.68&longitude=83.21&current=temperature_2m';
+    const response = await fetch(testUrl, { signal: AbortSignal.timeout(10000) });
+    const data = await response.json();
+    res.json({ success: true, temperature: data.current?.temperature_2m, platform: process.platform });
+  } catch (err) {
+    res.json({ success: false, error: err.message, cause: err.cause?.message, platform: process.platform });
+  }
+});
+
 // --- Auth: Validate token (for frontend startup check) ---
 app.get('/api/auth/validate', requireAuth, (req, res) => {
   res.json({ success: true, userId: req.userId });
@@ -900,7 +912,7 @@ app.get('/api/weather', weatherRateLimit, async (req, res) => {
     _weatherCache.set(cacheKey, { data: responseData, ts: Date.now() });
     res.json(responseData);
   } catch (err) {
-    console.error('Weather API error:', err.message);
+    console.error('Weather API error:', err.message, err.cause?.message || '');
     // Return stale cache if available during errors
     const cacheKey = `${Math.max(-90, Math.min(90, parseFloat(req.query.lat) || 17.6868)).toFixed(2)},${Math.max(-180, Math.min(180, parseFloat(req.query.lng) || 83.2185)).toFixed(2)}`;
     const staleCache = _weatherCache.get(cacheKey);
@@ -911,6 +923,7 @@ app.get('/api/weather', weatherRateLimit, async (req, res) => {
     res.status(503).json({
       success: false,
       error: 'Weather service temporarily unavailable. Please try again.',
+      _debug: process.env.NODE_ENV !== 'production' ? err.message : undefined,
     });
   }
 });
