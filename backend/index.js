@@ -8,7 +8,10 @@ const nodemailer = require('nodemailer');
 const path = require('path');
 const { Agent, setGlobalDispatcher } = require('undici');
 // Force IPv4 for all outbound fetch() calls (IPv6 hangs on some Windows machines)
-setGlobalDispatcher(new Agent({ connect: { family: 4 } }));
+// Only apply on Windows - Render (Linux) handles IPv6 fine
+if (process.platform === 'win32') {
+  setGlobalDispatcher(new Agent({ connect: { family: 4 } }));
+}
 
 // Polyfill AbortSignal.timeout for Node < 17.3
 if (typeof AbortSignal !== 'undefined' && typeof AbortSignal.timeout !== 'function') {
