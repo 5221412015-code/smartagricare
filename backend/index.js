@@ -663,11 +663,13 @@ async function proxyToMlService(req, res) {
     }
     return res.json(data);
   } catch (err) {
-    console.error('ML service unavailable:', err.message);
+    console.error('ML service unavailable:', err.message, err.cause?.message || '');
     res.status(503).json({
       success: false,
       status: 'error',
       error: 'Disease detection service is currently unavailable. Please try again in a moment.',
+      _debug: err.message,
+      _cause: err.cause?.message,
     });
   }
 }
