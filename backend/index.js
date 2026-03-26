@@ -11,10 +11,10 @@ const { Agent, setGlobalDispatcher } = require('undici');
 setGlobalDispatcher(new Agent({ connect: { family: 4 } }));
 
 // Polyfill AbortSignal.timeout for Node < 17.3
-if (!AbortSignal.timeout) {
-  AbortSignal.timeout = (ms) => {
+if (typeof AbortSignal !== 'undefined' && typeof AbortSignal.timeout !== 'function') {
+  AbortSignal.timeout = function(ms) {
     const controller = new AbortController();
-    setTimeout(() => controller.abort(), ms);
+    setTimeout(function() { controller.abort(); }, ms);
     return controller.signal;
   };
 }
