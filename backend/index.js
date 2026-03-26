@@ -10,6 +10,15 @@ const { Agent, setGlobalDispatcher } = require('undici');
 // Force IPv4 for all outbound fetch() calls (IPv6 hangs on some Windows machines)
 setGlobalDispatcher(new Agent({ connect: { family: 4 } }));
 
+// Polyfill AbortSignal.timeout for Node < 17.3
+if (!AbortSignal.timeout) {
+  AbortSignal.timeout = (ms) => {
+    const controller = new AbortController();
+    setTimeout(() => controller.abort(), ms);
+    return controller.signal;
+  };
+}
+
 // --------------- Groq LLM (primary — free tier: 30 RPM, 14400 RPD) ---------------
 const GROQ_API_KEY = process.env.GROQ_API_KEY || '';
 const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
@@ -781,11 +790,15 @@ app.get('/api/crops/:name', (req, res) => {
 // --- Resilient fetch with retry ---
 async function fetchWithRetry(url, options = {}, retries = 2, delayMs = 1000, timeoutMs = 15000) {
   for (let i = 0; i <= retries; i++) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
     try {
-      const res = await fetch(url, { ...options, signal: AbortSignal.timeout(timeoutMs) });
+      const res = await fetch(url, { ...options, signal: controller.signal });
+      clearTimeout(timeoutId);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return res;
     } catch (err) {
+      clearTimeout(timeoutId);
       if (i === retries) throw err;
       await new Promise(r => setTimeout(r, delayMs * (i + 1)));
     }
@@ -835,10 +848,13 @@ app.get('/api/weather', weatherRateLimit, async (req, res) => {
     } else {
       try {
         const nominatimUrl = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&zoom=10&addressdetails=1`;
+        const geoController = new AbortController();
+        const geoTimeout = setTimeout(() => geoController.abort(), 5000);
         const geoRes = await fetch(nominatimUrl, {
           headers: { 'User-Agent': 'SmartAgriCare/1.0' },
-          signal: AbortSignal.timeout(5000),
+          signal: geoController.signal,
         });
+        clearTimeout(geoTimeout);
         if (geoRes.ok) {
           const geoData = await geoRes.json();
           const addr = geoData.address || {};
