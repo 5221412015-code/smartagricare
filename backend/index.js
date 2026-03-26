@@ -779,10 +779,10 @@ app.get('/api/crops/:name', (req, res) => {
 });
 
 // --- Resilient fetch with retry ---
-async function fetchWithRetry(url, options = {}, retries = 2, delayMs = 1000) {
+async function fetchWithRetry(url, options = {}, retries = 2, delayMs = 1000, timeoutMs = 15000) {
   for (let i = 0; i <= retries; i++) {
     try {
-      const res = await fetch(url, { ...options, signal: AbortSignal.timeout(10000) });
+      const res = await fetch(url, { ...options, signal: AbortSignal.timeout(timeoutMs) });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return res;
     } catch (err) {
@@ -794,6 +794,8 @@ async function fetchWithRetry(url, options = {}, retries = 2, delayMs = 1000) {
 
 // --- Weather (Open-Meteo + reverse geocoding) ---
 const weatherRateLimit = rateLimit(60000, 20); // 20 weather requests per minute per IP
+const _weatherCache = new Map(); // key: "lat,lng" (truncated) → { data, ts }
+const WEATHER_CACHE_TTL = 300000; // 5 minutes - weather doesn't change that fast
 const _nominatimCache = new Map(); // key: "lat,lng" (truncated) → { name, ts }
 const NOMINATIM_CACHE_TTL = 3600000; // 1 hour
 // Evict stale Nominatim cache entries every hour
@@ -802,15 +804,25 @@ setInterval(() => {
   for (const [key, val] of _nominatimCache) {
     if (now - val.ts > NOMINATIM_CACHE_TTL) _nominatimCache.delete(key);
   }
+  for (const [key, val] of _weatherCache) {
+    if (now - val.ts > WEATHER_CACHE_TTL) _weatherCache.delete(key);
+  }
 }, NOMINATIM_CACHE_TTL);
 app.get('/api/weather', weatherRateLimit, async (req, res) => {
   try {
     const lat = Math.max(-90, Math.min(90, parseFloat(req.query.lat) || 17.6868));
     const lng = Math.max(-180, Math.min(180, parseFloat(req.query.lng) || 83.2185));
+    const cacheKey = `${lat.toFixed(2)},${lng.toFixed(2)}`;
 
-    // Fetch current weather + 7-day daily forecast (with retry)
+    // Check weather cache first
+    const cachedWeather = _weatherCache.get(cacheKey);
+    if (cachedWeather && Date.now() - cachedWeather.ts < WEATHER_CACHE_TTL) {
+      return res.json(cachedWeather.data);
+    }
+
+    // Fetch current weather + 7-day daily forecast (with retry, 20s timeout for Render)
     const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,precipitation,uv_index&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=auto&forecast_days=7`;
-    const weatherRes = await fetchWithRetry(weatherUrl);
+    const weatherRes = await fetchWithRetry(weatherUrl, {}, 3, 1500, 20000);
     const weatherData = await weatherRes.json();
     const current = weatherData.current;
 
@@ -849,7 +861,7 @@ app.get('/api/weather', weatherRateLimit, async (req, res) => {
       weatherCode: daily.weather_code?.[i] ?? 0,
     }));
 
-    res.json({
+    const responseData = {
       success: true,
       weather: {
         temperature: Math.round(current.temperature_2m),
@@ -863,9 +875,20 @@ app.get('/api/weather', weatherRateLimit, async (req, res) => {
         location: locationName,
         forecast,
       },
-    });
+    };
+
+    // Cache successful response
+    _weatherCache.set(cacheKey, { data: responseData, ts: Date.now() });
+    res.json(responseData);
   } catch (err) {
     console.error('Weather API error:', err.message);
+    // Return stale cache if available during errors
+    const cacheKey = `${Math.max(-90, Math.min(90, parseFloat(req.query.lat) || 17.6868)).toFixed(2)},${Math.max(-180, Math.min(180, parseFloat(req.query.lng) || 83.2185)).toFixed(2)}`;
+    const staleCache = _weatherCache.get(cacheKey);
+    if (staleCache) {
+      console.log('Weather: returning stale cache due to API error');
+      return res.json({ ...staleCache.data, _stale: true });
+    }
     res.status(503).json({
       success: false,
       error: 'Weather service temporarily unavailable. Please try again.',
