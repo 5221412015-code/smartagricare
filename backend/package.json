@@ -17,6 +17,7 @@
     "dotenv": "^17.2.4",
     "express": "^5.2.1",
     "helmet": "^8.1.0",
+    "mongodb": "^7.1.1",
     "nodemailer": "^8.0.1",
     "sql.js": "^1.14.0",
     "undici": "^7.22.0"

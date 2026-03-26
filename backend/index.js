@@ -21,8 +21,10 @@ const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
 // --------------- SambaNova LLM fallback (free tier, OpenAI-compatible) ---------------
 const SAMBANOVA_API_KEY = process.env.SAMBANOVA_API_KEY || '';
 const SAMBANOVA_MODEL = process.env.SAMBANOVA_MODEL || 'Meta-Llama-3.1-70B-Instruct';
-// SQLite database
-const { getDb, save, flushSave, createUser, findUserByEmail, saveDiseaseReport, getUserReports, createResetToken, findValidResetToken, markTokenUsed, updateUserPassword, updateUserProfile, saveAuthToken, findAuthToken, deleteAuthToken, deleteAuthTokensByEmail, purgeExpiredAuthTokens } = require('./db');
+// Database: MongoDB if MONGODB_URI is set, otherwise SQLite (local)
+const dbModule = process.env.MONGODB_URI ? './db-mongo' : './db';
+console.log(`Database: ${process.env.MONGODB_URI ? 'MongoDB Atlas' : 'SQLite (local)'}`);
+const { getDb, save, flushSave, createUser, findUserByEmail, saveDiseaseReport, getUserReports, createResetToken, findValidResetToken, markTokenUsed, updateUserPassword, updateUserProfile, saveAuthToken, findAuthToken, deleteAuthToken, deleteAuthTokensByEmail, purgeExpiredAuthTokens } = require(dbModule);
 
 const app = express();
 const PORT = process.env.PORT || 5000;
