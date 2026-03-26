@@ -916,7 +916,8 @@ app.get('/api/weather', weatherRateLimit, async (req, res) => {
     res.status(503).json({
       success: false,
       error: 'Weather service temporarily unavailable. Please try again.',
-      _debug: process.env.NODE_ENV !== 'production' ? err.message : undefined,
+      _debug: err.message,
+      _cause: err.cause?.message,
     });
   }
 });
