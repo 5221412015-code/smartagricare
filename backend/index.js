@@ -805,15 +805,11 @@ app.get('/api/crops/:name', (req, res) => {
 // --- Resilient fetch with retry ---
 async function fetchWithRetry(url, options = {}, retries = 2, delayMs = 1000, timeoutMs = 15000) {
   for (let i = 0; i <= retries; i++) {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
     try {
-      const res = await fetch(url, { ...options, signal: controller.signal });
-      clearTimeout(timeoutId);
+      const res = await fetch(url, { ...options, signal: AbortSignal.timeout(timeoutMs) });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return res;
     } catch (err) {
-      clearTimeout(timeoutId);
       if (i === retries) throw err;
       await new Promise(r => setTimeout(r, delayMs * (i + 1)));
     }
