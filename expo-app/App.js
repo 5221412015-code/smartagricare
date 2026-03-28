@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { SafeAreaView, StyleSheet, Platform, ActivityIndicator, View, Text, PermissionsAndroid } from 'react-native';
+import { SafeAreaView, StyleSheet, Platform, ActivityIndicator, View, Text, PermissionsAndroid, Animated, Easing } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useState, useEffect, useRef } from 'react';
 import * as Location from 'expo-location';
@@ -12,13 +12,35 @@ const DEV_URL = 'http://192.168.55.104:8080';
 // Auto-switch: use local in dev, production in release builds
 const APP_URL = __DEV__ ? DEV_URL : PROD_URL;
 
+// Agriculture-themed loading messages
+const LOADING_MESSAGES = [
+  'Preparing your farm dashboard...',
+  'Gathering crop insights...',
+  'Checking weather conditions...',
+  'Loading agricultural data...',
+  'Setting up your fields...',
+];
+
 export default function App() {
   const [serverReady, setServerReady] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [statusMsg, setStatusMsg] = useState('Connecting to server...');
+  const [statusMsg, setStatusMsg] = useState(LOADING_MESSAGES[0]);
   const webviewRef = useRef(null);
   const [nativeLoc, setNativeLoc] = useState(null);
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  // Pulse animation for the plant emoji
+  useEffect(() => {
+    const pulse = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, { toValue: 1.15, duration: 800, easing: Easing.ease, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 1, duration: 800, easing: Easing.ease, useNativeDriver: true }),
+      ])
+    );
+    pulse.start();
+    return () => pulse.stop();
+  }, []);
 
   // Poll /api/health until server is awake (skips Render's interstitial page)
   useEffect(() => {
@@ -38,7 +60,7 @@ export default function App() {
             const data = await res.json();
             if (data.status === 'ok') {
               if (!cancelled) {
-                setStatusMsg('Loading app...');
+                setStatusMsg('Opening SmartAgriCare...');
                 setServerReady(true);
               }
               return;
@@ -50,11 +72,10 @@ export default function App() {
 
         if (cancelled) return;
 
-        if (attempts <= 3) {
-          setStatusMsg('Waking up server...');
-        } else if (attempts <= 8) {
-          setStatusMsg('Almost ready...');
-        } else if (attempts > 15) {
+        // Cycle through agriculture messages
+        setStatusMsg(LOADING_MESSAGES[attempts % LOADING_MESSAGES.length]);
+
+        if (attempts > 20) {
           if (!cancelled) setError(true);
           return;
         }
@@ -140,21 +161,22 @@ export default function App() {
 
   if (error) {
     return (
-      <SafeAreaView style={styles.center}>
-        <Text style={styles.splashEmoji}>🌱</Text>
-        <Text style={styles.errorTitle}>Cannot connect</Text>
-        <Text style={styles.errorMsg}>The server may be temporarily unavailable.{'\n'}Please try again in a moment.</Text>
-        <Text style={styles.errorUrl}>{APP_URL}</Text>
+      <SafeAreaView style={styles.splash}>
+        <StatusBar style="light" />
+        <Animated.Text style={[styles.splashEmoji, { transform: [{ scale: pulseAnim }] }]}>🌾</Animated.Text>
+        <Text style={styles.splashTitle}>SmartAgriCare</Text>
+        <Text style={styles.errorTitle}>Unable to connect</Text>
+        <Text style={styles.errorMsg}>Please check your internet connection{'\n'}and try again.</Text>
       </SafeAreaView>
     );
   }
 
-  // Show custom splash while server wakes up
+  // Show custom splash while server wakes up (unified green theme)
   if (!serverReady) {
     return (
       <SafeAreaView style={styles.splash}>
         <StatusBar style="light" />
-        <Text style={styles.splashEmoji}>🌱</Text>
+        <Animated.Text style={[styles.splashEmoji, { transform: [{ scale: pulseAnim }] }]}>🌾</Animated.Text>
         <Text style={styles.splashTitle}>SmartAgriCare</Text>
         <Text style={styles.splashSubtitle}>AI-Powered Agriculture</Text>
         <View style={styles.splashLoaderWrap}>
@@ -169,10 +191,15 @@ export default function App() {
     <SafeAreaView style={styles.container}>
       <StatusBar style="dark" />
       {loading && (
-        <View style={styles.loader}>
-          <Text style={styles.splashEmoji}>🌱</Text>
-          <ActivityIndicator size="large" color="#6B8F3C" style={{ marginTop: 16 }} />
-          <Text style={styles.loaderText}>Loading...</Text>
+        <View style={styles.splash}>
+          <StatusBar style="light" />
+          <Animated.Text style={[styles.splashEmoji, { transform: [{ scale: pulseAnim }] }]}>🌾</Animated.Text>
+          <Text style={styles.splashTitle}>SmartAgriCare</Text>
+          <Text style={styles.splashSubtitle}>AI-Powered Agriculture</Text>
+          <View style={styles.splashLoaderWrap}>
+            <ActivityIndicator size="large" color="#8BC34A" />
+            <Text style={styles.splashStatus}>Loading your farm...</Text>
+          </View>
         </View>
       )}
 
@@ -208,6 +235,10 @@ export default function App() {
         domStorageEnabled
         cacheEnabled={true}
         cacheMode="LOAD_DEFAULT"
+        // Enable persistent storage for login sessions
+        sharedCookiesEnabled={true}
+        thirdPartyCookiesEnabled={true}
+        incognito={false}
         startInLoadingState={false}
         allowsBackForwardNavigationGestures
         mediaPlaybackRequiresUserAction={false}
@@ -223,31 +254,33 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f3ef',
+    backgroundColor: '#2D6A2E',
     paddingTop: Platform.OS === 'android' ? 25 : 0,
   },
   webview: {
     flex: 1,
   },
-  // Custom splash screen (shown while Render wakes up)
+  // Unified splash screen (green theme throughout)
   splash: {
+    ...StyleSheet.absoluteFillObject,
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#2D6A2E',
+    zIndex: 10,
   },
   splashEmoji: {
-    fontSize: 72,
+    fontSize: 80,
     marginBottom: 16,
   },
   splashTitle: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: 'bold',
     color: '#FFFFFF',
-    marginBottom: 4,
+    marginBottom: 6,
   },
   splashSubtitle: {
-    fontSize: 15,
+    fontSize: 16,
     color: '#A5D6A7',
     marginBottom: 48,
   },
@@ -256,36 +289,16 @@ const styles = StyleSheet.create({
   },
   splashStatus: {
     marginTop: 14,
-    fontSize: 14,
+    fontSize: 15,
     color: '#C8E6C9',
     fontWeight: '500',
   },
-  // WebView loading overlay
-  loader: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f5f3ef',
-    zIndex: 10,
-  },
-  loaderText: {
-    marginTop: 12,
-    fontSize: 14,
-    color: '#3D5A1E',
-    fontWeight: '600',
-  },
-  // Error screen
-  center: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#2D6A2E',
-    padding: 24,
-  },
+  // Error styles (same green theme)
   errorTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#FFCDD2',
+    marginTop: 24,
     marginBottom: 8,
   },
   errorMsg: {
@@ -293,11 +306,5 @@ const styles = StyleSheet.create({
     color: '#C8E6C9',
     textAlign: 'center',
     lineHeight: 22,
-  },
-  errorUrl: {
-    marginTop: 16,
-    fontSize: 12,
-    color: '#81C784',
-    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
   },
 });

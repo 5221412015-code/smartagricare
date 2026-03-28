@@ -1,0 +1,878 @@
+{
+  "corn_maize": {
+    "healthy": {
+      "status": "healthy",
+      "label": "Healthy",
+      "message": "No Disease Detected. Crop is Healthy."
+    },
+    "cercospora_leaf_spot": {
+      "status": "diseased",
+      "crop": "Corn / Maize",
+      "disease": "Cercospora Leaf Spot (Gray Leaf Spot)",
+      "cause_of_disease": "Caused by the fungus Cercospora zeae-maydis, thriving in warm, humid conditions with heavy dew and temperatures between 22–30°C. Spreads through infected crop debris left in the field. Rectangular, grayish-tan lesions run parallel to leaf veins, reducing photosynthesis and yield.",
+      "deficiencies": [
+        "Nitrogen Deficiency — weakens overall plant immunity making it highly susceptible to fungal attack; shows as yellowing of lower leaves",
+        "Potassium Deficiency — reduces cell wall strength and plant's natural disease resistance; increases lesion spread",
+        "Silicon Deficiency — low silicon levels weaken leaf surface structure making fungal penetration easier"
+      ],
+      "disorders": [
+        "Premature Leaf Senescence — infected leaves die early reducing the plant's ability to photosynthesize",
+        "Reduced Grain Fill — early leaf loss during grain-filling stage directly reduces kernel weight and yield",
+        "Stalk Weakening — severe infections weaken the stalk making plants prone to lodging and breakage"
+      ],
+      "natural_organic_treatment": [
+        "Spray Neem Oil 3000 PPM @ 3 ml per litre of water at first symptom — repeat every 10 days",
+        "Apply Trichoderma viride @ 4 g per litre of water as a foliar spray for biological fungal control",
+        "Use Bacillus subtilis bio-fungicide @ 2 g per litre — effective as both preventive and curative spray",
+        "Remove and destroy all infected crop debris after harvest to eliminate fungal overwintering source",
+        "Maintain proper crop rotation — avoid planting maize in the same field consecutively for 2 seasons"
+      ],
+      "treatment": [
+        "Apply Propiconazole 25% EC or Azoxystrobin 23% SC fungicide immediately",
+        "Remove and destroy infected lower leaves",
+        "Improve air circulation by maintaining proper plant spacing",
+        "Avoid overhead irrigation to reduce leaf wetness",
+        "Rotate crops to reduce fungal buildup in soil"
+      ],
+      "medication_timeline": [
+        {
+          "medicine": "Propiconazole 25% EC",
+          "quantity_per_acre": "200 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At first symptom (VT/R1 stage)",
+          "repeat": "Every 14–21 days",
+          "total_duration": "4–6 Weeks"
+        },
+        {
+          "medicine": "Azoxystrobin 23% SC",
+          "quantity_per_acre": "400 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At first symptom",
+          "repeat": "Every 14–21 days",
+          "total_duration": "4–6 Weeks"
+        },
+        {
+          "medicine": "Tebuconazole 25.9% EC",
+          "quantity_per_acre": "200 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At first symptom",
+          "repeat": "Every 14–21 days",
+          "total_duration": "4–6 Weeks"
+        }
+      ],
+      "max_sprays": "2–3 per season"
+    },
+    "common_rust": {
+      "status": "diseased",
+      "crop": "Corn / Maize",
+      "disease": "Common Rust",
+      "cause_of_disease": "Caused by Puccinia sorghi, spreading rapidly through airborne spores in cool, moist weather between 16–23°C. Small, circular to elongated powdery brick-red pustules appear on both leaf surfaces. High humidity and dew on leaves accelerate infection.",
+      "deficiencies": [
+        "Potassium Deficiency — weakens cell walls and reduces the plant's natural resistance to rust pustule formation",
+        "Silicon Deficiency — low silicon content in leaves makes them structurally weak and easier for rust spores to penetrate",
+        "Zinc Deficiency — impairs plant immune signalling and makes recovery from rust infection slower"
+      ],
+      "disorders": [
+        "Reduced Grain Fill — heavy rust infection during grain-fill stage leads to poor kernel development and lightweight grains",
+        "Premature Leaf Death — severe rust causes early leaf chlorosis and death reducing overall photosynthetic capacity",
+        "Increased Susceptibility to Secondary Infections — rust-weakened tissue invites secondary fungal and bacterial pathogens"
+      ],
+      "natural_organic_treatment": [
+        "Spray Neem Oil 3000 PPM @ 3 ml per litre every 10–14 days from first pustule appearance",
+        "Apply Baking Soda (Sodium Bicarbonate) solution @ 5 g per litre of water with a few drops of liquid soap — disrupts spore germination",
+        "Use Bacillus subtilis bio-fungicide spray @ 2 g per litre as a preventive and early curative spray",
+        "Apply wood ash around the base of plants to improve potassium levels and strengthen plant resistance",
+        "Use resistant hybrid varieties in next season to naturally prevent rust recurrence"
+      ],
+      "treatment": [
+        "Apply Mancozeb 75% WP or Propiconazole 25% EC immediately at first pustule sighting",
+        "Avoid overhead irrigation as it spreads spores",
+        "Remove heavily infected leaves to reduce spore load",
+        "Use rust-resistant hybrid varieties in next season",
+        "Ensure proper field sanitation after harvest"
+      ],
+      "medication_timeline": [
+        {
+          "medicine": "Mancozeb 75% WP",
+          "quantity_per_acre": "400–600 g",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At first pustule appearance",
+          "repeat": "Every 10–14 days",
+          "total_duration": "3–5 Weeks"
+        },
+        {
+          "medicine": "Chlorothalonil 75% WP",
+          "quantity_per_acre": "300–400 g",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At first pustule appearance",
+          "repeat": "Every 10–14 days",
+          "total_duration": "3–5 Weeks"
+        },
+        {
+          "medicine": "Propiconazole 25% EC",
+          "quantity_per_acre": "200 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At first pustule appearance",
+          "repeat": "Every 10–14 days",
+          "total_duration": "3–5 Weeks"
+        }
+      ],
+      "max_sprays": "2–3 per season"
+    },
+    "northern_leaf_blight": {
+      "status": "diseased",
+      "crop": "Corn / Maize",
+      "disease": "Northern Leaf Blight",
+      "cause_of_disease": "Caused by Exserohilum turcicum, producing large cigar-shaped lesions (2.5–15 cm long) in warm, humid conditions between 18–27°C. Fungal spores overwinter in infected crop debris and spread via wind and rain splashes. Disease starts from lower leaves and moves upward.",
+      "deficiencies": [
+        "Nitrogen Deficiency — excess or deficient nitrogen both promote disease; deficient nitrogen weakens the plant's recovery ability",
+        "Potassium Deficiency — reduces the plant's ability to resist fungal penetration and slows wound healing in infected tissue",
+        "Calcium Deficiency — weakens cell wall integrity allowing faster lesion expansion across leaf tissue"
+      ],
+      "disorders": [
+        "Premature Canopy Collapse — large cigar-shaped lesions rapidly destroy the leaf canopy reducing photosynthesis by up to 50%",
+        "Poor Kernel Development — early canopy loss during silking and grain-fill stage directly causes shrivelled, lightweight kernels",
+        "Increased Stalk Rot Risk — plants weakened by leaf blight become highly prone to secondary stalk rot fungi like Fusarium"
+      ],
+      "natural_organic_treatment": [
+        "Spray Trichoderma harzianum @ 4 g per litre of water as a foliar biological fungicide — apply at tasseling stage",
+        "Apply Neem Oil 3000 PPM @ 3 ml per litre every 10–14 days from disease onset",
+        "Use Copper-based organic spray (Bordeaux mixture 1%) @ 500 ml per litre diluted in 200 litres — natural copper fungicide",
+        "Apply Pseudomonas fluorescens bio-agent @ 5 g per litre as a foliar spray for biological disease suppression",
+        "Burn and destroy all infected crop debris immediately after harvest to break the disease cycle"
+      ],
+      "treatment": [
+        "Apply Propiconazole 25% EC or Azoxystrobin + Propiconazole combo immediately",
+        "Apply at tasseling to silking stage — this is the most critical treatment window",
+        "Remove and burn infected plant debris after harvest",
+        "Avoid excessive nitrogen fertilization which promotes disease spread",
+        "Use resistant varieties for future planting"
+      ],
+      "medication_timeline": [
+        {
+          "medicine": "Propiconazole 25% EC",
+          "quantity_per_acre": "200 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At VT (tasseling) stage",
+          "repeat": "After 14 days",
+          "total_duration": "4–6 Weeks"
+        },
+        {
+          "medicine": "Azoxystrobin + Propiconazole (combo)",
+          "quantity_per_acre": "400 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At VT (tasseling) stage",
+          "repeat": "After 14 days",
+          "total_duration": "4–6 Weeks"
+        },
+        {
+          "medicine": "Tebuconazole 25.9% EC",
+          "quantity_per_acre": "200 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At VT (tasseling) stage",
+          "repeat": "After 14 days",
+          "total_duration": "4–6 Weeks"
+        }
+      ],
+      "max_sprays": "2 per season"
+    }
+  },
+
+  "cotton": {
+    "healthy": {
+      "status": "healthy",
+      "label": "Healthy",
+      "message": "No Disease Detected. Crop is Healthy."
+    },
+    "aphids": {
+      "status": "diseased",
+      "crop": "Cotton",
+      "disease": "Aphids",
+      "cause_of_disease": "Caused by Aphis gossypii (cotton aphid), a small soft-bodied insect clustering on leaf undersides and growing tips. Thrives in warm, dry conditions between 20–30°C. Spreads rapidly through winged adults and transmits viral diseases. Secretes honeydew leading to sooty mold.",
+      "deficiencies": [
+        "Nitrogen Deficiency Symptoms — aphid sap-sucking causes yellowing and stunting that mimics nitrogen deficiency in affected leaves",
+        "Magnesium Deficiency — prolonged aphid feeding reduces plant's ability to absorb and utilize magnesium leading to interveinal chlorosis",
+        "Zinc Deficiency — heavy infestation weakens root function impairing zinc uptake causing small distorted new leaves"
+      ],
+      "disorders": [
+        "Sooty Mold Disorder — honeydew secreted by aphids encourages black sooty mold growth blocking sunlight and reducing photosynthesis",
+        "Leaf Curl Disorder — toxins injected during aphid feeding cause leaf curling, cupping, and distortion of young shoots",
+        "Viral Transmission Disorder — aphids act as vectors transmitting Cotton Leaf Curl Virus (CLCuV) causing irreversible stunting"
+      ],
+      "natural_organic_treatment": [
+        "Spray Neem Oil 3000 PPM @ 5 ml per litre of water — suffocates aphids and disrupts their life cycle; repeat every 7 days",
+        "Apply Insecticidal Soap (1% solution) — spray directly on aphid colonies on leaf undersides to kill on contact",
+        "Release Ladybugs (Coccinella septempunctata) or Green Lacewings in the field — natural biological predators of aphids",
+        "Spray Garlic Extract solution @ 50 g crushed garlic boiled in 1 litre water, diluted 1:10 — natural aphid repellent",
+        "Place Yellow Sticky Traps @ 10–12 per acre to monitor and reduce winged aphid population naturally"
+      ],
+      "treatment": [
+        "Apply Imidacloprid 17.8% SL or Thiamethoxam 25% WG immediately",
+        "Spray during early morning or evening for best absorption",
+        "Place yellow sticky traps for monitoring and mass trapping",
+        "Avoid excessive nitrogen fertilization which attracts aphids",
+        "Rotate insecticide groups to prevent resistance buildup"
+      ],
+      "medication_timeline": [
+        {
+          "medicine": "Imidacloprid 17.8% SL",
+          "quantity_per_acre": "100 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At first infestation detection",
+          "repeat": "Every 10–15 days",
+          "total_duration": "3–4 Weeks"
+        },
+        {
+          "medicine": "Thiamethoxam 25% WG",
+          "quantity_per_acre": "40 g",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At first infestation detection",
+          "repeat": "Every 10–15 days",
+          "total_duration": "3–4 Weeks"
+        },
+        {
+          "medicine": "Dimethoate 30% EC",
+          "quantity_per_acre": "300 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At first infestation detection",
+          "repeat": "Every 10–15 days",
+          "total_duration": "3–4 Weeks"
+        }
+      ],
+      "max_sprays": "2 per season (rotate chemicals)"
+    },
+    "army_worm": {
+      "status": "diseased",
+      "crop": "Cotton",
+      "disease": "Army Worm",
+      "cause_of_disease": "Caused by larvae of Spodoptera species. Active at night, hiding in soil during daytime. Thrives in warm, humid conditions. Spreads through adult moth flight and egg-laying. Can devastate entire fields within days if undetected causing complete defoliation.",
+      "deficiencies": [
+        "Nitrogen Deficiency — severe defoliation by army worms deprives plants of leaf nitrogen causing systemic starvation and poor recovery",
+        "Phosphorus Deficiency — root damage from soil-dwelling larvae reduces phosphorus absorption leading to dark purplish discoloration of leaves",
+        "Iron Deficiency — larval feeding damage disrupts the plant's vascular system reducing iron transport to new growth"
+      ],
+      "disorders": [
+        "Complete Defoliation Disorder — mass larval feeding strips the plant of all leaves leaving bare stalks unable to photosynthesize",
+        "Boll Shedding Disorder — feeding damage at boll attachment points causes premature boll drop reducing lint yield",
+        "Root Zone Damage — soil-dwelling early instar larvae damage feeder roots causing wilting and nutrient uptake failure"
+      ],
+      "natural_organic_treatment": [
+        "Spray Bacillus thuringiensis (Bt) var. kurstaki @ 1 kg per acre — highly effective biological insecticide that kills larvae naturally; apply in evening",
+        "Apply Neem Oil 3000 PPM @ 5 ml per litre — acts as antifeedant preventing larvae from feeding; spray in the evening",
+        "Use Nuclear Polyhedrosis Virus (NPV) of Spodoptera @ 250 LE per acre — species-specific biological control agent",
+        "Set up Pheromone Traps @ 5–6 per acre to capture adult moths and reduce egg-laying significantly",
+        "Deep plow the field after harvest to expose and kill pupae and eggs in the soil naturally"
+      ],
+      "treatment": [
+        "Apply Chlorpyrifos 20% EC or Emamectin Benzoate 5% SG immediately",
+        "Spray in the evening or early morning when larvae are most active",
+        "Remove and destroy egg masses manually during early infestation",
+        "Use pheromone traps for monitoring adult moth population",
+        "Deep plowing after harvest to expose and kill pupae in soil"
+      ],
+      "medication_timeline": [
+        {
+          "medicine": "Chlorpyrifos 20% EC",
+          "quantity_per_acre": "400–500 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "When larvae are in early instar stage",
+          "repeat": "Every 7–10 days",
+          "total_duration": "2–3 Weeks"
+        },
+        {
+          "medicine": "Emamectin Benzoate 5% SG",
+          "quantity_per_acre": "80–100 g",
+          "water_volume": "200 Litres",
+          "when_to_apply": "When larvae are in early instar stage",
+          "repeat": "Every 7–10 days",
+          "total_duration": "2–3 Weeks"
+        },
+        {
+          "medicine": "Spinosad 45% SC",
+          "quantity_per_acre": "75–100 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "When larvae are in early instar stage",
+          "repeat": "Every 7–10 days",
+          "total_duration": "2–3 Weeks"
+        }
+      ],
+      "max_sprays": "2–3 per season"
+    },
+    "bacterial_blight": {
+      "status": "diseased",
+      "crop": "Cotton",
+      "disease": "Bacterial Blight",
+      "cause_of_disease": "Caused by Xanthomonas axonopodis pv. malvacearum, thriving in warm, wet conditions between 25–35°C. Spreads through rain splash, contaminated farm tools, infected seeds, and working in wet fields. Water-soaked angular spots on leaves turning brown/black are the first visible symptoms.",
+      "deficiencies": [
+        "Copper Deficiency — low copper levels reduce plant's natural antibacterial defense mechanism making it prone to bacterial infection",
+        "Calcium Deficiency — weakens cell walls allowing bacterial penetration and rapid spread through leaf tissue",
+        "Boron Deficiency — impairs cell wall integrity and reduces the plant's ability to seal off infected tissue and prevent spread"
+      ],
+      "disorders": [
+        "Boll Rot Disorder — bacteria invade developing bolls causing internal rotting and complete loss of lint and seed",
+        "Vascular Wilting Disorder — bacterial invasion of stem vascular tissue causes water and nutrient transport blockage leading to wilting",
+        "Fiber Quality Disorder — infected bolls produce discolored, weak fiber with significantly reduced commercial value"
+      ],
+      "natural_organic_treatment": [
+        "Apply Bordeaux Mixture (1%) @ 500 ml diluted in 200 litres — copper-based organic bactericide; spray at first symptom",
+        "Treat seeds in Hot Water @ 57°C for 30 minutes before sowing to eliminate seed-borne bacterial infection",
+        "Spray Garlic Extract @ 100 g crushed garlic in 1 litre water diluted 1:5 — natural broad-spectrum antibacterial spray",
+        "Apply Trichoderma viride @ 4 g per litre as soil drenching to suppress bacterial activity in the root zone",
+        "Use compost tea spray (well-decomposed compost steeped in water for 24 hours) to promote beneficial microbes that suppress pathogens"
+      ],
+      "treatment": [
+        "Apply Copper Oxychloride 50% WP or Streptomycin + Tetracycline combo immediately",
+        "Avoid working in the field when it is wet to prevent bacterial spread",
+        "Remove and destroy infected leaves and bolls",
+        "Use disease-free certified seeds for future planting",
+        "Disinfect farm tools regularly with bleach solution"
+      ],
+      "medication_timeline": [
+        {
+          "medicine": "Copper Oxychloride 50% WP",
+          "quantity_per_acre": "600 g",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At first symptom appearance",
+          "repeat": "Every 10–14 days",
+          "total_duration": "4–6 Weeks"
+        },
+        {
+          "medicine": "Streptomycin + Tetracycline (combo)",
+          "quantity_per_acre": "100 g",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At first symptom appearance",
+          "repeat": "Every 10–14 days",
+          "total_duration": "4–6 Weeks"
+        },
+        {
+          "medicine": "Kasugamycin (Bacterinol)",
+          "quantity_per_acre": "400 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At first symptom appearance",
+          "repeat": "Every 10–14 days",
+          "total_duration": "4–6 Weeks"
+        }
+      ],
+      "max_sprays": "3 per season"
+    },
+    "powdery_mildew": {
+      "status": "diseased",
+      "crop": "Cotton",
+      "disease": "Powdery Mildew",
+      "cause_of_disease": "Caused by Leveillula taurica, favored by warm days, cool nights, and dry conditions between 20–28°C. Spreads through airborne spores. White to grayish powdery growth develops on upper and lower leaf surfaces. Excessive nitrogen fertilization and dense planting promote rapid spread.",
+      "deficiencies": [
+        "Silicon Deficiency — low silicon content weakens epidermal cell walls making leaves highly susceptible to powdery mildew penetration",
+        "Calcium Deficiency — reduces cell wall strength allowing fungal haustoria to penetrate leaf cells more easily",
+        "Potassium Deficiency — imbalanced potassium levels reduce osmotic regulation in leaf cells making them vulnerable to fungal colonization"
+      ],
+      "disorders": [
+        "Premature Leaf Drop Disorder — infected leaves yellow rapidly and drop early reducing photosynthetic area and boll filling capacity",
+        "Reduced Boll Set Disorder — early defoliation from mildew weakens the plant causing excessive shedding of immature bolls",
+        "Physiological Drought Stress — powdery mildew blocks stomata disrupting transpiration and increasing internal heat stress in the plant"
+      ],
+      "natural_organic_treatment": [
+        "Spray Neem Oil 3000 PPM @ 5 ml per litre every 7–10 days — disrupts fungal spore germination on leaf surfaces",
+        "Apply Baking Soda (Sodium Bicarbonate) @ 5–10 g per litre with 2 ml liquid soap — changes leaf surface pH inhibiting fungal growth",
+        "Spray Milk solution (1 part fresh milk : 9 parts water) — milk proteins act as natural fungicide effective against powdery mildew",
+        "Use Wettable Sulphur (organic grade) @ 3 g per litre — natural contact fungicide effective against powdery mildew",
+        "Apply Trichoderma viride @ 4 g per litre as a foliar spray for biological suppression of the fungal pathogen"
+      ],
+      "treatment": [
+        "Apply Sulphur 80% WP or Hexaconazole 5% EC immediately",
+        "Ensure good air circulation through proper plant spacing",
+        "Avoid excessive nitrogen fertilization",
+        "Remove and destroy heavily infected leaves",
+        "Do not spray Sulphur when temperatures exceed 35°C as it may cause phytotoxicity"
+      ],
+      "medication_timeline": [
+        {
+          "medicine": "Sulphur 80% WP",
+          "quantity_per_acre": "600–800 g",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At first sign of white powdery growth",
+          "repeat": "Every 10–14 days",
+          "total_duration": "3–5 Weeks"
+        },
+        {
+          "medicine": "Hexaconazole 5% EC",
+          "quantity_per_acre": "200 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At first sign of white powdery growth",
+          "repeat": "Every 10–14 days",
+          "total_duration": "3–5 Weeks"
+        },
+        {
+          "medicine": "Triadimefon 25% WP",
+          "quantity_per_acre": "200 g",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At first sign of white powdery growth",
+          "repeat": "Every 10–14 days",
+          "total_duration": "3–5 Weeks"
+        }
+      ],
+      "max_sprays": "2–3 per season"
+    },
+    "target_spot": {
+      "status": "diseased",
+      "crop": "Cotton",
+      "disease": "Target Spot",
+      "cause_of_disease": "Caused by Corynespora cassiicola, thriving in high humidity above 80% and temperatures between 25–32°C. Spreads through airborne spores and rain splash. Circular brown lesions with concentric rings give a target-like appearance. Dense canopy conditions that trap moisture significantly accelerate spread.",
+      "deficiencies": [
+        "Potassium Deficiency — reduces plant resistance to fungal diseases; potassium-deficient plants show faster lesion expansion and spread",
+        "Magnesium Deficiency — weakens chloroplast function reducing the plant's photosynthetic recovery capacity after infection",
+        "Zinc Deficiency — slows tissue repair mechanisms and reduces the plant's ability to form defensive compounds against the fungus"
+      ],
+      "disorders": [
+        "Premature Defoliation Disorder — target spot lesions cause rapid leaf yellowing and drop dramatically reducing photosynthesis",
+        "Boll Retention Failure — severe defoliation triggers a stress response in the plant causing immature boll shedding",
+        "Secondary Infection Disorder — open lesions created by target spot create entry points for secondary bacterial and fungal pathogens"
+      ],
+      "natural_organic_treatment": [
+        "Spray Neem Oil 3000 PPM @ 5 ml per litre every 10–14 days from disease onset — reduces fungal spore germination",
+        "Apply Trichoderma viride bio-fungicide @ 4 g per litre as foliar spray — effective biological control of Corynespora",
+        "Use Copper-based Bordeaux Mixture (0.5–1%) spray — organic copper fungicide with broad-spectrum activity",
+        "Apply compost mulch around plant base to reduce rain splash which spreads spores from soil to leaves",
+        "Maintain proper plant spacing and remove lower leaves to improve air circulation and reduce humidity in the canopy"
+      ],
+      "treatment": [
+        "Apply Azoxystrobin 23% SC or Thiophanate Methyl 70% WP immediately",
+        "Improve canopy airflow through proper plant spacing",
+        "Avoid excessive irrigation especially on foliage",
+        "Remove and destroy infected leaves promptly",
+        "Apply preventive fungicide sprays during high humidity periods"
+      ],
+      "medication_timeline": [
+        {
+          "medicine": "Azoxystrobin 23% SC",
+          "quantity_per_acre": "400 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At early disease stage",
+          "repeat": "Every 14 days",
+          "total_duration": "4–6 Weeks"
+        },
+        {
+          "medicine": "Thiophanate Methyl 70% WP",
+          "quantity_per_acre": "300 g",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At early disease stage",
+          "repeat": "Every 14 days",
+          "total_duration": "4–6 Weeks"
+        },
+        {
+          "medicine": "Chlorothalonil 75% WP",
+          "quantity_per_acre": "400 g",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At early disease stage",
+          "repeat": "Every 14 days",
+          "total_duration": "4–6 Weeks"
+        }
+      ],
+      "max_sprays": "2–3 per season"
+    }
+  },
+
+  "paddy": {
+    "healthy": {
+      "status": "healthy",
+      "label": "Healthy",
+      "message": "No Disease Detected. Crop is Healthy."
+    },
+    "blast": {
+      "status": "diseased",
+      "crop": "Paddy (Rice)",
+      "disease": "Blast",
+      "cause_of_disease": "Caused by Magnaporthe oryzae, the most destructive rice disease worldwide. Thrives in cool, humid conditions between 20–28°C with heavy dew or rain. Diamond/eye-shaped lesions on leaves (leaf blast) and blackening of neck (neck blast). Excess nitrogen and dense planting worsen the disease.",
+      "deficiencies": [
+        "Silicon Deficiency — most critical deficiency; low silicon dramatically increases blast susceptibility as silicon strengthens leaf cell walls against fungal penetration",
+        "Potassium Deficiency — weakens plant immunity and reduces the ability to compartmentalize blast lesions preventing their spread",
+        "Phosphorus Deficiency — slows root development reducing the plant's overall vigor and disease tolerance capacity"
+      ],
+      "disorders": [
+        "Neck Rot Disorder — blast infection at the panicle neck completely cuts off nutrient flow causing the entire panicle to turn white (called white ear)",
+        "Panicle Sterility Disorder — neck blast at early grain-fill stage causes complete spikelet sterility resulting in empty grains and near-total yield loss",
+        "Node Blast Disorder — infection at stem nodes causes dark brown to black node discoloration and structural weakening leading to plant collapse"
+      ],
+      "natural_organic_treatment": [
+        "Apply Silicon-rich organic amendment (rice husk ash) @ 200 kg per acre as soil application — significantly boosts natural blast resistance",
+        "Spray Pseudomonas fluorescens @ 5 g per litre as foliar application — effective biological control of Magnaporthe",
+        "Apply Trichoderma harzianum @ 4 g per litre as foliar spray — proven biological fungicide against rice blast",
+        "Spray Neem Oil 3000 PPM @ 3 ml per litre every 10 days from tillering — reduces spore germination on leaf surfaces",
+        "Use Cow Urine (fermented) @ 10% solution as foliar spray — traditional organic treatment with antifungal properties"
+      ],
+      "treatment": [
+        "Apply Tricyclazole 75% WP or Isoprothiolane 40% EC immediately",
+        "Spray at tillering stage for leaf blast control",
+        "Spray again at panicle initiation stage for neck blast control",
+        "Avoid excess nitrogen fertilization",
+        "Drain the field intermittently to reduce humidity"
+      ],
+      "medication_timeline": [
+        {
+          "medicine": "Tricyclazole 75% WP",
+          "quantity_per_acre": "120–150 g",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At tillering stage and panicle initiation",
+          "repeat": "Every 10–15 days",
+          "total_duration": "4–6 Weeks"
+        },
+        {
+          "medicine": "Isoprothiolane 40% EC",
+          "quantity_per_acre": "300–400 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At tillering stage and panicle initiation",
+          "repeat": "Every 10–15 days",
+          "total_duration": "4–6 Weeks"
+        },
+        {
+          "medicine": "Carbendazim 50% WP",
+          "quantity_per_acre": "200 g",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At tillering stage and panicle initiation",
+          "repeat": "Every 10–15 days",
+          "total_duration": "4–6 Weeks"
+        }
+      ],
+      "max_sprays": "2–3 per season"
+    },
+    "brownspot": {
+      "status": "diseased",
+      "crop": "Paddy (Rice)",
+      "disease": "Brown Spot",
+      "cause_of_disease": "Caused by Bipolaris oryzae, thriving in warm, humid conditions between 25–30°C. Strongly linked to potassium and silicon-deficient soils. Small circular to oval brown spots with a yellow halo appear on leaves, glumes, and grains. Weakened plants due to nutrient stress are most vulnerable.",
+      "deficiencies": [
+        "Potassium Deficiency — primary predisposing factor; low soil potassium is directly linked to severe brown spot outbreaks in rice fields",
+        "Silicon Deficiency — silicon-deficient plants show dramatically increased susceptibility to brown spot lesion formation and spread",
+        "Nitrogen Deficiency — while excess nitrogen promotes disease, deficient nitrogen weakens plant immunity allowing the fungus to establish easily"
+      ],
+      "disorders": [
+        "Grain Discoloration Disorder — fungal infection of glumes and grains causes dark brown to black discoloration reducing market value significantly",
+        "Poor Grain Filling Disorder — severe brown spot reduces leaf area for photosynthesis causing poor carbohydrate supply to developing grains",
+        "Seedling Blight Disorder — in heavily infected seedbeds, the pathogen attacks seedlings causing damping-off and poor transplant establishment"
+      ],
+      "natural_organic_treatment": [
+        "Seed Treatment with Trichoderma viride @ 4 g per kg of seed before sowing — prevents seed-borne infection at germination",
+        "Apply potassium-rich organic amendment (wood ash @ 400 kg per acre) to correct soil potassium deficiency",
+        "Spray Neem Oil 3000 PPM @ 3 ml per litre every 10–14 days from early symptom appearance",
+        "Apply rice husk ash (silica source) @ 200 kg per acre as soil amendment to boost silicon levels and disease resistance",
+        "Use Pseudomonas fluorescens foliar spray @ 5 g per litre — biological suppression of Bipolaris oryzae spore germination"
+      ],
+      "treatment": [
+        "Apply Mancozeb 75% WP or Propiconazole 25% EC immediately",
+        "Apply potassium fertilizer to correct soil nutrient deficiency",
+        "Treat seeds with Thiram or Carbendazim before sowing as prevention",
+        "Remove and destroy infected stubble after harvest",
+        "Avoid water stress and maintain proper irrigation"
+      ],
+      "medication_timeline": [
+        {
+          "medicine": "Mancozeb 75% WP",
+          "quantity_per_acre": "400 g",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At early symptom appearance",
+          "repeat": "Every 14 days",
+          "total_duration": "3–4 Weeks"
+        },
+        {
+          "medicine": "Iprodione 50% WP",
+          "quantity_per_acre": "200 g",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At early symptom appearance",
+          "repeat": "Every 14 days",
+          "total_duration": "3–4 Weeks"
+        },
+        {
+          "medicine": "Propiconazole 25% EC",
+          "quantity_per_acre": "200 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At early symptom appearance",
+          "repeat": "Every 14 days",
+          "total_duration": "3–4 Weeks"
+        }
+      ],
+      "max_sprays": "2 per season"
+    },
+    "tungro": {
+      "status": "diseased",
+      "crop": "Paddy (Rice)",
+      "disease": "Tungro",
+      "is_viral": true,
+      "viral_note": "Viral Disease — No Direct Cure. Vector (leafhopper) control is the only management strategy.",
+      "cause_of_disease": "Caused by Rice Tungro Bacilliform Virus (RTBV) and Rice Tungro Spherical Virus (RTSV), transmitted by the green leafhopper Nephotettix virescens. Infected plants show yellow-orange leaf discoloration, severely stunted growth, and reduced tillering. Warm, humid conditions and late transplanting increase infection risk.",
+      "deficiencies": [
+        "Iron Deficiency Mimic — tungro-infected plants show iron-deficiency-like symptoms with interveinal chlorosis but it is caused by viral disruption of nutrient transport",
+        "Zinc Deficiency Mimic — the virus disrupts zinc uptake pathways causing symptoms resembling zinc deficiency such as stunted growth and yellowing",
+        "Nitrogen Utilization Disorder — even with adequate soil nitrogen, virus-infected plants cannot effectively absorb and utilize nitrogen causing pale yellow discoloration"
+      ],
+      "disorders": [
+        "Severe Stunting Disorder — infected plants stop growing at 30–50% of normal height making them unproductive and prone to shading by healthy plants",
+        "Spikelet Sterility Disorder — tungro-infected panicles produce mostly empty or partially-filled grains causing near-complete yield failure",
+        "Root Dysfunction Disorder — viral infection impairs root development and function reducing water and nutrient absorption even in well-fertilized fields"
+      ],
+      "natural_organic_treatment": [
+        "Spray Neem Oil 3000 PPM @ 5 ml per litre every 7 days to control leafhopper vector population naturally",
+        "Apply Yellow Sticky Traps @ 10–15 per acre to capture adult leafhoppers and monitor population levels",
+        "Use Reflective Mulches or silver-colored plastic mulch in nursery beds — disorients and deters leafhopper movement",
+        "Plant Trap Crops like Napier grass around field borders to attract and trap leafhoppers away from rice",
+        "Remove and destroy all infected plants immediately — this is the single most important organic management step to prevent virus spread"
+      ],
+      "treatment": [
+        "Apply Imidacloprid 17.8% SL immediately to control leafhopper vector",
+        "Apply Carbofuran 3% G in soil at transplanting as a preventive measure",
+        "Remove and destroy all infected plants immediately to prevent spread",
+        "Avoid late transplanting which increases leafhopper exposure",
+        "Use tungro-resistant rice varieties for future planting"
+      ],
+      "medication_timeline": [
+        {
+          "medicine": "Imidacloprid 17.8% SL",
+          "quantity_per_acre": "100 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At transplanting (preventive) and at first leafhopper detection",
+          "repeat": "Every 10–15 days",
+          "total_duration": "4–6 Weeks"
+        },
+        {
+          "medicine": "Buprofezin 25% SC",
+          "quantity_per_acre": "400 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At first leafhopper detection",
+          "repeat": "Every 10–15 days",
+          "total_duration": "4–6 Weeks"
+        },
+        {
+          "medicine": "Carbofuran 3% G",
+          "quantity_per_acre": "6–8 kg",
+          "water_volume": "Soil Application",
+          "when_to_apply": "At transplanting",
+          "repeat": "Once",
+          "total_duration": "Preventive"
+        }
+      ],
+      "max_sprays": "2–3 per season"
+    }
+  },
+
+  "sugarcane": {
+    "healthy": {
+      "status": "healthy",
+      "label": "Healthy",
+      "message": "No Disease Detected. Crop is Healthy."
+    },
+    "mosiac": {
+      "status": "diseased",
+      "crop": "Sugarcane",
+      "disease": "Mosaic",
+      "is_viral": true,
+      "viral_note": "Viral Disease — No Direct Cure. Aphid vector control and removal of infected plants is the only management strategy.",
+      "cause_of_disease": "Caused by Sugarcane Mosaic Virus (SCMV), transmitted by aphids especially Melanaphis sacchari. Leaves show alternating light green and dark green mosaic or streaking patterns. Spreads through infected seed cane and aphid movement. Warm, dry conditions with high aphid populations increase infection risk.",
+      "deficiencies": [
+        "Nitrogen Deficiency — viral infection severely impairs nitrogen metabolism causing systemic protein breakdown and pale, mottled foliage",
+        "Potassium Deficiency — mosaic virus disrupts potassium transport leading to reduced stalk cell turgor and lower sugar accumulation",
+        "Magnesium Deficiency — virus-induced chlorophyll breakdown causes magnesium release symptoms including interveinal yellowing on older leaves"
+      ],
+      "disorders": [
+        "Reduced Sugar Content Disorder — SCMV disrupts photosynthesis and sugar metabolism in infected stalks directly reducing sucrose content and juice quality",
+        "Poor Ratoon Performance Disorder — virus persists in stubble and ratoon crops consistently show worse symptoms and lower yields than plant crop",
+        "Stunted Stalk Development Disorder — infected plants produce short, thin stalks with reduced internode length severely impacting commercial biomass"
+      ],
+      "natural_organic_treatment": [
+        "Spray Neem Oil 3000 PPM @ 5 ml per litre every 10–14 days to control aphid vector population naturally",
+        "Apply Garlic Extract spray @ 50 g crushed garlic in 1 litre water diluted 1:10 — natural repellent for aphid vectors",
+        "Use Yellow Sticky Traps @ 10 per acre to capture and monitor winged aphids before they establish colonies",
+        "Rogue out and destroy infected plants immediately on detection — prevents virus from spreading to healthy neighboring plants",
+        "Use certified disease-free seed cane — the single most effective organic prevention strategy for mosaic virus"
+      ],
+      "treatment": [
+        "Apply Imidacloprid 17.8% SL or Thiamethoxam 25% WG immediately to control aphid vector",
+        "Remove and destroy all infected plant stools immediately",
+        "Use only disease-free certified seed cane for planting",
+        "Rogue out infected plants promptly to prevent spread to healthy plants",
+        "Disinfect cutting tools with bleach solution between plants"
+      ],
+      "medication_timeline": [
+        {
+          "medicine": "Imidacloprid 17.8% SL",
+          "quantity_per_acre": "100 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At first aphid detection or early mosaic symptoms",
+          "repeat": "Every 14–21 days",
+          "total_duration": "4–6 Weeks"
+        },
+        {
+          "medicine": "Thiamethoxam 25% WG",
+          "quantity_per_acre": "40 g",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At first aphid detection or early mosaic symptoms",
+          "repeat": "Every 14–21 days",
+          "total_duration": "4–6 Weeks"
+        }
+      ],
+      "max_sprays": "2–3 per season"
+    },
+    "redrot": {
+      "status": "diseased",
+      "crop": "Sugarcane",
+      "disease": "Red Rot",
+      "cause_of_disease": "Caused by Colletotrichum falcatum, the most serious disease of sugarcane. Thrives in warm, humid conditions between 28–32°C. Internal reddening of stalk with white patches and an alcoholic smell. Spreads through infected seed setts, waterlogged soils, and contaminated cutting tools. Most damaging during ratoon crop stage.",
+      "deficiencies": [
+        "Calcium Deficiency — weakens cell wall structure in stalk tissue making it easier for the fungus to penetrate and colonize internal tissues",
+        "Boron Deficiency — impairs cell wall cross-linking and reduces the plant's ability to produce defensive phenolic compounds against the pathogen",
+        "Potassium Deficiency — reduces stalk tissue density and osmotic regulation making the plant more susceptible to fungal colonization"
+      ],
+      "disorders": [
+        "Internal Stalk Rot Disorder — the fungus destroys internal stalk tissue causing complete hollowing with characteristic red discoloration and white patches",
+        "Fermentation Disorder — destroyed stalk tissue undergoes fermentation producing alcoholic smell which is a diagnostic sign of advanced red rot infection",
+        "Ratoon Failure Disorder — infected stumps and stubble harbor the fungus throughout the season causing complete failure of ratoon crop establishment"
+      ],
+      "natural_organic_treatment": [
+        "Hot Water Sett Treatment @ 52°C for 30 minutes before planting — highly effective organic method to kill fungus on seed setts without chemicals",
+        "Sett Treatment with Trichoderma viride @ 4 g per litre — soak setts for 30 minutes in bio-fungicide solution before planting",
+        "Apply Neem Cake @ 200 kg per acre as soil amendment — suppresses soil-borne Colletotrichum falcatum population naturally",
+        "Drench soil with Pseudomonas fluorescens @ 5 g per litre around plant base to suppress fungal activity in root zone",
+        "Remove and burn infected clumps immediately — do not compost infected material as the fungus survives composting"
+      ],
+      "treatment": [
+        "Treat seed setts by soaking in Carbendazim 50% WP solution for 30 minutes before planting",
+        "Apply Propiconazole 25% EC or Hexaconazole 5% EC as field spray at early symptoms",
+        "Remove and burn all infected clumps immediately",
+        "Avoid waterlogging by improving field drainage",
+        "Disinfect all cutting tools with bleach before use"
+      ],
+      "medication_timeline": [
+        {
+          "medicine": "Carbendazim 50% WP (sett dip)",
+          "quantity_per_acre": "100 g in 100 Litres water",
+          "water_volume": "100 Litres",
+          "when_to_apply": "30-minute soak before planting (preventive)",
+          "repeat": "Once pre-planting",
+          "total_duration": "Preventive"
+        },
+        {
+          "medicine": "Propiconazole 25% EC",
+          "quantity_per_acre": "200 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At early field symptom detection",
+          "repeat": "Every 15–20 days",
+          "total_duration": "6–8 Weeks"
+        },
+        {
+          "medicine": "Hexaconazole 5% EC",
+          "quantity_per_acre": "400 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At early field symptom detection",
+          "repeat": "Every 15–20 days",
+          "total_duration": "6–8 Weeks"
+        }
+      ],
+      "max_sprays": "3 per season"
+    },
+    "rust": {
+      "status": "diseased",
+      "crop": "Sugarcane",
+      "disease": "Rust",
+      "cause_of_disease": "Caused by Puccinia melanocephala (Brown Rust) or Puccinia kuehnii (Orange Rust). Spreads through airborne spores in warm, humid conditions between 25–30°C. Small, orange-brown pustules appear on underside of leaves. Wind is the primary carrier. Dense planting and excessive irrigation create ideal conditions for rapid spread.",
+      "deficiencies": [
+        "Silicon Deficiency — silicon-deficient plants lack the epidermal cell wall reinforcement needed to resist rust pustule formation and spore penetration",
+        "Potassium Deficiency — weakens the plant's systemic acquired resistance reducing its ability to produce anti-rust defense compounds",
+        "Sulphur Deficiency — low sulphur impairs the plant's synthesis of defensive proteins and phytoalexins that naturally suppress rust infection"
+      ],
+      "disorders": [
+        "Leaf Chlorosis Disorder — extensive rust pustule formation causes massive chlorophyll breakdown leading to large-scale yellowing of leaf tissue",
+        "Premature Leaf Drying Disorder — heavy rust infection causes leaves to dry from tip to base reducing the green photosynthetic area by 40–60%",
+        "Reduced Sugar Recovery Disorder — photosynthesis loss from rust-damaged leaves directly reduces sucrose synthesis and juice sugar content at harvest"
+      ],
+      "natural_organic_treatment": [
+        "Spray Neem Oil 3000 PPM @ 5 ml per litre every 10–14 days from first pustule detection",
+        "Apply Wettable Sulphur (organic grade) @ 3 g per litre — effective natural contact fungicide specifically against rust pathogens",
+        "Use Bacillus subtilis bio-fungicide spray @ 2 g per litre as foliar spray — proven biological control of rust in sugarcane",
+        "Apply Silicon-rich soil amendment (rice husk ash @ 200 kg per acre) — boosts systemic resistance against rust infection",
+        "Avoid dense planting and trim lower leaves to improve air circulation and reduce the humid microclimate that favors rust"
+      ],
+      "treatment": [
+        "Apply Propiconazole 25% EC or Triadimefon 25% WP immediately at early pustule stage",
+        "Avoid overly dense planting to reduce humidity in the canopy",
+        "Remove and destroy heavily infected leaves",
+        "Use rust-resistant sugarcane varieties for future planting",
+        "Apply preventive fungicide sprays during high humidity season"
+      ],
+      "medication_timeline": [
+        {
+          "medicine": "Propiconazole 25% EC",
+          "quantity_per_acre": "200 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At early pustule formation",
+          "repeat": "Every 14 days",
+          "total_duration": "4–6 Weeks"
+        },
+        {
+          "medicine": "Triadimefon 25% WP",
+          "quantity_per_acre": "300 g",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At early pustule formation",
+          "repeat": "Every 14 days",
+          "total_duration": "4–6 Weeks"
+        },
+        {
+          "medicine": "Mancozeb 75% WP",
+          "quantity_per_acre": "500 g",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At early pustule formation",
+          "repeat": "Every 14 days",
+          "total_duration": "4–6 Weeks"
+        }
+      ],
+      "max_sprays": "2–3 per season"
+    },
+    "yellow": {
+      "status": "diseased",
+      "crop": "Sugarcane",
+      "disease": "Yellow Leaf Disease",
+      "is_viral": true,
+      "viral_note": "Viral Disease — No Direct Cure. Aphid vector control and use of certified disease-free planting material is the only management strategy.",
+      "cause_of_disease": "Caused by Sugarcane Yellow Leaf Virus (ScYLV), transmitted by the sugarcane aphid Melanaphis sacchari. Yellowing begins on the midrib on the underside of leaves and progresses to full leaf yellowing. Warm, dry weather with high aphid populations accelerates spread. Causes 10–30% yield loss.",
+      "deficiencies": [
+        "Potassium Deficiency Mimic — ScYLV disrupts potassium transport causing midrib yellowing symptoms that strongly resemble potassium deficiency",
+        "Magnesium Deficiency — virus disrupts chlorophyll synthesis by impairing magnesium incorporation causing progressive leaf yellowing from midrib outward",
+        "Nitrogen Utilization Failure — even in nitrogen-adequate soils, virus-infected plants cannot process nitrogen efficiently causing systemic yellowing and stunting"
+      ],
+      "disorders": [
+        "Midrib Yellowing Disorder — characteristic yellow discoloration of the underside of leaf midrib is the earliest and most diagnostic symptom of ScYLV infection",
+        "Photosynthetic Collapse Disorder — progressive yellowing of the entire leaf destroys chlorophyll causing massive reduction in photosynthesis and sugar production",
+        "Poor Juice Quality Disorder — infected stalks show significantly reduced sucrose content, increased reducing sugars, and poor juice purity at extraction"
+      ],
+      "natural_organic_treatment": [
+        "Spray Neem Oil 3000 PPM @ 5 ml per litre every 10 days — effectively controls the aphid vector Melanaphis sacchari population",
+        "Apply Garlic + Chilli Extract spray (50 g garlic + 25 g dry chilli per litre, diluted 1:10) — natural aphid repellent spray",
+        "Apply potassium-rich organic compost @ 2 tonnes per acre — helps compensate for virus-induced potassium utilization disruption",
+        "Use Yellow Sticky Traps @ 12–15 per acre to monitor and capture winged aphid vectors before they spread the virus",
+        "Remove and destroy all severely infected plants immediately — reduces the virus reservoir available for aphid-mediated spread"
+      ],
+      "treatment": [
+        "Apply Imidacloprid 17.8% SL or Dimethoate 30% EC immediately to control aphid vector",
+        "Use only virus-free certified planting material",
+        "Remove and destroy all severely infected plants immediately",
+        "Apply balanced potassium fertilization to support plant recovery",
+        "Monitor aphid population regularly using yellow sticky traps"
+      ],
+      "medication_timeline": [
+        {
+          "medicine": "Imidacloprid 17.8% SL",
+          "quantity_per_acre": "100 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At first aphid detection",
+          "repeat": "Every 14–21 days",
+          "total_duration": "4–6 Weeks"
+        },
+        {
+          "medicine": "Dimethoate 30% EC",
+          "quantity_per_acre": "300 ml",
+          "water_volume": "200 Litres",
+          "when_to_apply": "At first aphid detection",
+          "repeat": "Every 14–21 days",
+          "total_duration": "4–6 Weeks"
+        }
+      ],
+      "max_sprays": "2–3 per season"
+    }
+  }
+}
