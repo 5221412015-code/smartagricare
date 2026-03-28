@@ -17,7 +17,25 @@ let initialized = false;
 
 async function getDb() {
     if (!initialized) {
-        await client.connect();
+        try {
+            await client.connect();
+        } catch (err) {
+            // Provide clear, actionable error messages
+            if (err.code === 8000 || err.message?.includes('auth')) {
+                console.error('\n╔═══════════════════════════════════════════════════════════════╗');
+                console.error('║  MongoDB Authentication Failed                                 ║');
+                console.error('╠═══════════════════════════════════════════════════════════════╣');
+                console.error('║  Please check your MONGODB_URI in Render environment vars:    ║');
+                console.error('║                                                               ║');
+                console.error('║  1. Go to Render Dashboard → Your Service → Environment       ║');
+                console.error('║  2. Check MONGODB_URI has correct username:password           ║');
+                console.error('║  3. Ensure password is URL-encoded (@ → %40, etc.)            ║');
+                console.error('║  4. Verify MongoDB Atlas user has readWrite permissions       ║');
+                console.error('║  5. Check Atlas Network Access allows 0.0.0.0/0               ║');
+                console.error('╚═══════════════════════════════════════════════════════════════╝\n');
+            }
+            throw err;
+        }
         db = client.db('smartagricare');
 
         // Create indexes
