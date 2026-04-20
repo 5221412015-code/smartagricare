@@ -8,6 +8,8 @@ import io
 import json
 import logging
 import threading
+import shutil
+import urllib.request
 import numpy as np
 import torch
 import torch.nn.functional as F
@@ -46,6 +48,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(BASE_DIR)
 MODEL_PATH = os.path.join(ROOT_DIR, 'best_swin_crop_disease.pth')
 DISEASE_DATA_PATH = os.path.join(ROOT_DIR, 'crop_disease_data.json')
+MODEL_URL = os.environ.get('MODEL_URL', '').strip()
 
 # ── Load disease data ──────────────────────────────────────────
 with open(DISEASE_DATA_PATH, 'r', encoding='utf-8') as f:
@@ -160,21 +163,78 @@ def compute_energy_score(logits_tensor, temperature=1.0):
     energy = -temperature * torch.logsumexp(logits_tensor / temperature, dim=1)
     return energy.item()
 
-# ── Load Swin-B model ─────────────────────────────────────────
-logger.info('Loading model from %s ...', MODEL_PATH)
-checkpoint = torch.load(MODEL_PATH, map_location='cpu', weights_only=False)
+def ensure_model_file():
+    """Ensure model file exists; download from MODEL_URL when configured."""
+    if os.path.exists(MODEL_PATH):
+        return True
+    if not MODEL_URL:
+        logger.warning('Model file missing at %s and MODEL_URL is not set.', MODEL_PATH)
+        return False
 
-model = timm.create_model('swin_base_patch4_window12_384',
-                          pretrained=False,
-                          num_classes=NUM_CLASSES)
-model.load_state_dict(checkpoint['model_state_dict'])
-model.eval()
+    tmp_path = MODEL_PATH + '.tmp'
+    try:
+        logger.info('Model file not found. Downloading from MODEL_URL...')
+        with urllib.request.urlopen(MODEL_URL, timeout=180) as src, open(tmp_path, 'wb') as dst:
+            shutil.copyfileobj(src, dst)
+        os.replace(tmp_path, MODEL_PATH)
+        logger.info('Model downloaded to %s', MODEL_PATH)
+        return True
+    except Exception as exc:
+        logger.exception('Failed to download model from MODEL_URL: %s', exc)
+        try:
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
+        except Exception:
+            pass
+        return False
 
-val_acc = checkpoint.get('val_acc', 'N/A')
-epoch = checkpoint.get('epoch', 'N/A')
-class_names = checkpoint.get('class_names', [])
-logger.info('Model loaded  epoch %s, val_acc %s', epoch, val_acc)
-logger.info('Classes (%d): %s', len(class_names), class_names)
+
+model = None
+model_error = ''
+val_acc = 'N/A'
+epoch = 'N/A'
+class_names = []
+
+
+def load_model_once():
+    """Load model into memory once; return True if available."""
+    global model, model_error, val_acc, epoch, class_names
+
+    if model is not None:
+        return True
+
+    if not ensure_model_file():
+        model_error = 'Model file unavailable. Configure MODEL_URL or provide best_swin_crop_disease.pth at repository root.'
+        return False
+
+    try:
+        logger.info('Loading model from %s ...', MODEL_PATH)
+        checkpoint = torch.load(MODEL_PATH, map_location='cpu', weights_only=False)
+
+        loaded_model = timm.create_model('swin_base_patch4_window12_384',
+                                         pretrained=False,
+                                         num_classes=NUM_CLASSES)
+        loaded_model.load_state_dict(checkpoint['model_state_dict'])
+        loaded_model.eval()
+
+        model = loaded_model
+        val_acc = checkpoint.get('val_acc', 'N/A')
+        epoch = checkpoint.get('epoch', 'N/A')
+        class_names = checkpoint.get('class_names', [])
+        model_error = ''
+
+        logger.info('Model loaded  epoch %s, val_acc %s', epoch, val_acc)
+        logger.info('Classes (%d): %s', len(class_names), class_names)
+        return True
+    except Exception as exc:
+        model = None
+        model_error = f'Failed to load model: {exc}'
+        logger.exception('Model load failed: %s', exc)
+        return False
+
+
+# Attempt model load at startup (non-fatal in deployment).
+load_model_once()
 
 HEALTHY_INDICES = {8, 9, 12}
 
@@ -195,8 +255,10 @@ def too_large(_e):
 @app.route('/health', methods=['GET'])
 def health():
     return jsonify({
-        'status': 'ok',
+        'status': 'ok' if model is not None else 'degraded',
         'model': 'swin_base_patch4_window12_384',
+        'model_ready': model is not None,
+        'model_error': model_error,
         'classes': NUM_CLASSES,
         'val_acc': str(val_acc),
     })
@@ -210,6 +272,12 @@ def predict():
 
     img = None
     try:
+        if model is None and not load_model_once():
+            return jsonify({
+                'error': 'Model is not available yet. Please configure MODEL_URL or provide model file and retry.',
+                'details': model_error,
+            }), 503
+
         if 'image' not in request.files:
             return jsonify({'error': 'No image file. Send multipart with field "image".'}), 400
 
