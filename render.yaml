@@ -4,7 +4,7 @@ services:
     env: node
     plan: free
     buildCommand: cd frontend && npm install --include=dev && npm run build && cd ../backend && npm install
-    startCommand: cd backend && node index.js
+    startCommand: cd backend && npm start
     healthCheckPath: /api/health
     envVars:
       - key: NODE_VERSION
@@ -30,4 +30,19 @@ services:
       - key: SMTP_PASSWORD
         sync: false
       - key: ML_SERVICE_URL
-        sync: false
+        fromService:
+          type: pserv
+          name: smartagricare-ml
+          property: host
+
+  - type: pserv
+    name: smartagricare-ml
+    env: python
+    plan: free
+    rootDir: ml-service
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.9"
